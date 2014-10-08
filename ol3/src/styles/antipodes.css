@@ -1,12 +1,6 @@
-body p {
-  color: #000;
-}
-body .col-md-6 {
-  border: 1px solid #000;
-  padding: 0;
-  -webkit-transition: -webkit-transform 1s;
-          transition: transform 1s;
-}
 body .map {
   height: 450px;
+}
+body .maps .row {
+  padding: 10px;
 }
