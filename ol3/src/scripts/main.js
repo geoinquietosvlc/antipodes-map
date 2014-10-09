@@ -1,6 +1,16 @@
 'use strict';
 
 /**
+ * @param {number} n The max number of characters to keep.
+ * @return {string} Truncated string.
+ */
+String.prototype.trunc = String.prototype.trunc ||
+    function(n) {
+      return this.length > n ? this.substr(0, n - 1) + '...' : this.substr(0);
+    };
+
+
+/**
  * Custom control to add a cross in the middle of the map
  * @constructor
  * @extends {ol.control.Control}
@@ -23,20 +33,21 @@ ol.inherits(CenterCrossControl, ol.control.Control);
 /*
   Main class constructor
 */
-function AntipodeMap(center,divId,maps){
-  this.divId = divId;
+function AntipodeMap(center,opts,maps){
+  this.opts = opts;
+  this.divId = opts.div;
   this.highlight = undefined;
   this.maps = maps;
 
   /* ol view */
   this.view = new ol.View({
     center: center,
-    zoom: 7,
-    minZoom: 4
+    zoom: maps.opts.zoom || 7,
+    minZoom: maps.opts.minZoom || 4
   });
   /* ol3 map */
   this.map = new ol.Map({
-    target: divId,
+    target: this.divId,
     renderer: 'canvas',
     layers: [
       new ol.layer.Tile({
@@ -72,14 +83,34 @@ AntipodeMap.prototype.antipode = function(center){
 AntipodeMap.prototype.getPointsLayer = function(){
   /* define a styling function to draw a maki marker
     icon and a label with the city name */
+  var nameProp = this.opts.nameProp;
+  var maxResolution = this.maps.opts.maxResolution;
+  var trunc = this.maps.opts.lableTrunc || 12;
   var styleFunction = function(feature,resolution){
-    var fontSize = '20';
-    if(resolution>=39134) {
-        fontSize = '12';
-    } else if(resolution>=9782) {
-        fontSize = '16';
-    } else if(resolution>=2444) {
-        fontSize = '18';
+
+    var getText = function(feature, resolution) {
+      var type = 'wrap';
+      var text = feature.get(nameProp);
+      console.log( (maxResolution/resolution).toFixed(2));
+
+      if (resolution > maxResolution) {
+         text = '';
+      } else if(resolution<=maxResolution*0.7) {
+          text = text;
+      } else if(resolution<=maxResolution*0.8) {
+          text = text.trunc(12);
+      } else if(resolution<=maxResolution*0.9) {
+          text = text.trunc(16);
+      }
+
+      return text;
+    };
+
+    var fontSize = 12;
+    if(resolution<=maxResolution*0.5) {
+        fontSize = fontSize*0.8;
+    } else if(resolution<=maxResolution*0.6) {
+        fontSize = fontSize*0.9;
     }
 
     return [new ol.style.Style({
@@ -91,8 +122,8 @@ AntipodeMap.prototype.getPointsLayer = function(){
         src: '../images/marker-18.png'
       })),
       text: new ol.style.Text({
-          font: fontSize + ' helvetica,sans-serif',
-          text: feature.get('CITY_NAME'),
+          font: Math.floor(fontSize) + 'px helvetica,sans-serif',
+          text: getText(feature, resolution),
           fill: new ol.style.Fill({
               color: '#000'
           }),
@@ -106,7 +137,7 @@ AntipodeMap.prototype.getPointsLayer = function(){
 
   var pointsLayer = new ol.layer.Vector({
     source: new ol.source.GeoJSON({
-      url: 'data/world_cities.json',
+      url: this.opts.data,
       projection: 'EPSG:3857'
     }),
     style: styleFunction
@@ -205,8 +236,8 @@ AntipodeMap.prototype.bindUI = function(opts){
  */
 function AntipodesMaps(opts) {
   this.opts = opts;
-  this.leftMap =  new AntipodeMap(opts.center,opts.left.div,this);
-  this.rightMap = this.leftMap.getAntipode(opts.right.div);
+  this.leftMap =  new AntipodeMap(opts.center,opts.left,this);
+  this.rightMap = this.leftMap.getAntipode(opts.right);
 
   this.leftMap.bindUI(opts.left);
   this.rightMap.bindUI(opts.right);
@@ -249,9 +280,9 @@ AntipodesMaps.prototype.updateDist = function() {
 
     // Render the template
     $('#distance').html(
-        lFeat.getProperties().CITY_NAME + ' (' + lFeat.getProperties().CNTRY_NAME + ') and ' +
-        rFeat.getProperties().CITY_NAME + ' (' + rFeat.getProperties().CNTRY_NAME + ') are ' +
-        dist.toFixed(0) + ' afar!!'
+        lFeat.getProperties()[this.opts.left.nameProp] + ' and ' +
+        rFeat.getProperties()[this.opts.right.nameProp] + ' are ' +
+        dist.toFixed(0) + ' kms away!!'
       );
   }
 };
@@ -261,18 +292,24 @@ AntipodesMaps.prototype.updateDist = function() {
   Execution starts here
 */
 new AntipodesMaps({
-  center: ol.proj.transform([-7.2, 42.7], 'EPSG:4326', 'EPSG:3857'),
+  center: ol.proj.transform([ -8.0075, 42.8210 ], 'EPSG:4326', 'EPSG:3857'),
+  zoom: 8,
+  maxResolution: 200,
   left : {
     'div':'leftmap',
     'lonSpan':'#lmaplon',
     'latSpan': '#lmaplat',
-    'feat': '#lfeat'
+    'feat': '#lfeat',
+    'data': '../data/schools_gl.geojson',
+    'nameProp': 'name'
   },
   right : {
     'div':'rightmap',
     'lonSpan':'#rmaplon',
     'latSpan': '#rmaplat',
-    'feat': '#rfeat'
+    'feat': '#rfeat',
+    'data': '../data/schools_nz_2009.geojson',
+    'nameProp': 'school'
   },
   dist: '#dist'
 });

@@ -27,9 +27,34 @@
 
       <div class="container">
 
-        <div class="page-header">
-          <h1>Antipodes</h1>
-        </div>
+        <header class="navbar navbar-static-top bs-docs-nav" id="top" role="banner">
+          <nav class="navbar navbar-default" role="navigation">
+            <div class="container-fluid">
+              <!-- Brand and toggle get grouped for better mobile display -->
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed"
+                  data-toggle="collapse" data-target="#myNavBar">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Antipodes</a>
+              </div>
+
+              <!-- Collect the nav links, forms, and other content for toggling -->
+              <div class="collapse navbar-collapse" id="myNavBar">
+                <ul class="nav navbar-nav navbar-right">
+                      <li><a data-toggle="modal" data-target="#about" href="#">About</a></li>
+                      <li><a href="https://github.com/geoinquietosvlc/antipodes-map">Repo</a></li>
+                      <li><a data-toggle="modal" data-target="#contact" href="#">Contact</a></li>
+                </ul>
+              </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+          </nav>
+        </header>
+
+
 
         <div class="row">
           <div class="col-md-12">
@@ -80,6 +105,43 @@
 
 
       </div> <!-- /container -->
+
+      <!-- About -->
+      <div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              <h4 class="modal-title" id="myModalLabel">About</h4>
+            </div>
+            <div class="modal-body">
+              <!-- TODO ABOUT -->
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="modal fade" id="contact" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              <h4 class="modal-title" id="myModalLabel">Contact</h4>
+            </div>
+            <div class="modal-body">
+              <!-- TODO ABOUT -->
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       <!-- build:js scripts/vendor.min.js -->
       <!-- bower:js -->
