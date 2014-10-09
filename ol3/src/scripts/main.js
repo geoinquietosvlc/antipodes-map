@@ -248,14 +248,11 @@ AntipodesMaps.prototype.updateDist = function() {
     var dist = haversine(lll[1],lll[0],rll[1],rll[0]);
 
     // Render the template
-    var template = $('#distance-tpl').html();
-    Mustache.parse(template);   // optional, speeds up future uses
-    var rendered = Mustache.render(template, {
-      from:lFeat.getProperties().CITY_NAME + ' (' + lFeat.getProperties().CNTRY_NAME + ')',
-      to: rFeat.getProperties().CITY_NAME + ' (' + rFeat.getProperties().CNTRY_NAME + ')',
-      dist:dist.toFixed(0)
-    });
-    $('#distance').html(rendered);
+    $('#distance').html(
+        lFeat.getProperties().CITY_NAME + ' (' + lFeat.getProperties().CNTRY_NAME + ') and ' +
+        rFeat.getProperties().CITY_NAME + ' (' + rFeat.getProperties().CNTRY_NAME + ') are ' +
+        dist.toFixed(0) + ' afar!!'
+      );
   }
 };
 

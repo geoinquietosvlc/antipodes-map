@@ -19,6 +19,7 @@
   "smarttabs": true,
   "jquery": true,
   "globals": {
-    "ol": true
+    "ol": true,
+    "Mustache": true
   }
 }
