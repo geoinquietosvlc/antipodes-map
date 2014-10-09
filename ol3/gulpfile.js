@@ -152,7 +152,7 @@ gulp.task('server-dist', function() {
 
 gulp.task('build', [
   //'clean',
-  'jshint',
+  //'jshint',
   'stylus',
   'css',
   'copy',
