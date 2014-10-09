@@ -1,8 +1,20 @@
+mapheight = 450px
+mapwidth = 450px
+crosssize = 18px
+
 body
 
   .map
-    height: 450px
+    height  mapheight
+    width mapwidth
 
   .maps .row
-    padding: 10px;
+    padding  10px;
 
+  .center-cross
+    position absolute
+    top  ( mapheight / 2 - crosssize / 2 )
+    left ( mapwidth / 2 - crosssize / 2 )
+    width  crosssize
+    height crosssize
+    background url('../images/cross-18.png') no-repeat center center

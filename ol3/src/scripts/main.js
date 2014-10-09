@@ -1,23 +1,42 @@
 'use strict';
 
+/**
+ * Custom control to add a cross in the middle of the map
+ * @constructor
+ * @extends {ol.control.Control}
+ * @param {Object=} opt_options Control options.
+ */
+function CenterCrossControl(optOptions) {
+  var options = optOptions || {};
+  var element = document.createElement('div');
+  element.className = 'center-cross ol-unselectable';
+
+  ol.control.Control.call(this, {
+    element: element,
+    target: options.target
+  });
+
+}
+ol.inherits(CenterCrossControl, ol.control.Control);
+
+
 /*
   Main class constructor
 */
-function AntipodeMap(center,divId){
-  /* initial center for the map */
-  this.center = center;
-  /* div Id where the map will be rendered */
+function AntipodeMap(center,divId,maps){
   this.divId = divId;
-  /* geometry */
-  this.geomCenter =  new ol.geom.Point(this.center);
+  this.highlight = undefined;
+  this.maps = maps;
+
   /* ol view */
   this.view = new ol.View({
-    center: this.center,
-    zoom: 7
+    center: center,
+    zoom: 7,
+    minZoom: 4
   });
   /* ol3 map */
   this.map = new ol.Map({
-    target: this.divId,
+    target: divId,
     renderer: 'canvas',
     layers: [
       new ol.layer.Tile({
@@ -26,46 +45,31 @@ function AntipodeMap(center,divId){
     ],
     view: this.view
   });
-  /* add the centroid vector layer */
-  this.addCenterLayer();
+  this.map.addControl(new CenterCrossControl());
+
   /* add the cities vector layer */
-  this.addCitiesLayer();
+  this.pointsLayer = this.getPointsLayer();
+  this.map.addLayer(this.pointsLayer);
+
+  this.setupOverlay();
 }
 
-
-/* Add a new vector layer with just one feature. That
- feature geometry will be synced with the view center.*/
-AntipodeMap.prototype.addCenterLayer = function() {
-  /* create a feature with this.geomCenter */
-  var centerFeature = new ol.Feature(this.geomCenter);
-  /* add a cross image style*/
-  centerFeature.setStyle(new ol.style.Style({
-    image: new ol.style.Icon(({
-    scale: 1,
-    rotation: 90 * Math.PI / 180,
-    anchor: [0.5, 0.5],
-    anchorXUnits: 'fraction',
-    anchorYUnits: 'fraction',
-    src: '../images/cross-18.png'
-    }))
-  }));
-  /* create a vector souce and add our feature to it*/
-  var vectorSource = new ol.source.Vector({projection: 'EPSG:4326'});
-  vectorSource.addFeatures([centerFeature]);
-
-  /* create a new vector layer with this source and add it to the map*/
-  var vectorLayer = new ol.layer.Vector({source: vectorSource });
-  this.map.addLayer(vectorLayer);
-
-  /* subscribe to the map view to update the
-    feature geom with the new center */
-  this.getView().on('change:center',function(evt){
-    centerFeature.setGeometry(new ol.geom.Point(evt.target.getCenter()));
-  });
+/* just access to the map view */
+AntipodeMap.prototype.getView = function(){
+  return this.view;
 };
 
+/* function to compute the antipodes of a 3857 coordinate */
+AntipodeMap.prototype.antipode = function(center){
+  var clt = ol.proj.transform(center, 'EPSG:3857', 'EPSG:4326');
+  var lon = clt[0] > 0 ? clt[0] - 180 : clt[0] + 180;
+  var lat = clt[1] * -1;
+  return ol.proj.transform([lon,lat], 'EPSG:4326', 'EPSG:3857');
+};
+
+
 /* Add a geojson cities layer */
-AntipodeMap.prototype.addCitiesLayer = function(){
+AntipodeMap.prototype.getPointsLayer = function(){
   /* define a styling function to draw a maki marker
     icon and a label with the city name */
   var styleFunction = function(feature,resolution){
@@ -100,34 +104,69 @@ AntipodeMap.prototype.addCitiesLayer = function(){
     })];
   };
 
-  /* add to the map a vector layer from a geojson*/
-  this.map.addLayer(new ol.layer.Vector({
+  var pointsLayer = new ol.layer.Vector({
     source: new ol.source.GeoJSON({
       url: 'data/world_cities.json',
       projection: 'EPSG:3857'
     }),
     style: styleFunction
-  }));
+  });
+
+  return pointsLayer;
 };
 
-/* just access to the map view */
-AntipodeMap.prototype.getView = function(){
-  return this.view;
+
+AntipodeMap.prototype.displayClosestCity = function(center,source,featureOverlay) {
+  var highlight = this.highlight;
+  var feature = source.getClosestFeatureToCoordinate(center);
+  if (feature !== highlight) {
+    if (highlight) {
+      featureOverlay.removeFeature(highlight);
+    }
+    if (feature) {
+      featureOverlay.addFeature(feature);
+    }
+  }
+  this.highlight = feature;
+  if (feature){
+    this.maps.features[this.divId] = feature;
+    this.maps.updateDist();
+  }
 };
 
-/* function to compute the antipodes of a 3857 coordinate */
-AntipodeMap.prototype.antipode = function(center){
-  var clt = ol.proj.transform(center, 'EPSG:3857', 'EPSG:4326');
-  var lon = clt[0] > 0 ? clt[0] - 180 : clt[0] + 180;
-  var lat = clt[1] * -1;
-  return ol.proj.transform([lon,lat], 'EPSG:4326', 'EPSG:3857');
+AntipodeMap.prototype.setupOverlay = function() {
+  var layer = this.pointsLayer;
+  var context = this;
+  var featureOverlay = new ol.FeatureOverlay({
+    map: this.map,
+    style: new ol.style.Style({
+      image: new ol.style.Icon(({
+        scale: 1,
+        anchor: [0.5, 1],
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'fraction',
+        src: '../images/marker-18-red.png'
+      }))})
+  });
+
+  this.map.on('moveend',function(){
+    var center = this.getView().getCenter();
+    if (layer && layer.getSource() && layer.getSource().getFeatures().length>0){
+       context.displayClosestCity(center,layer.getSource(),featureOverlay);
+    }
+  });
 };
 
-/* bind the instance map view to an external view, using
+
+/* return a binded antipodes map */
+AntipodeMap.prototype.getAntipode = function(divId) {
+  var center = this.antipode(this.getView().getCenter());
+  var antipodemap = new AntipodeMap(center,divId,this.maps);
+
+  /* bind the instance map view to an external view, using
   the antipode method to sync those views using it*/
-AntipodeMap.prototype.bindView = function(anotherView){
   var leftView = this.getView();
-  var rightView = anotherView;
+  var rightView = antipodemap.getView();
   var antipode = AntipodeMap.prototype.antipode;
 
   leftView.bindTo('resolution', rightView);
@@ -146,44 +185,98 @@ AntipodeMap.prototype.bindView = function(anotherView){
         }
       }
   );
-};
-
-/* return a binded antipodes map */
-AntipodeMap.prototype.getAntipode = function(divId) {
-  var center = this.antipode(this.getView().getCenter());
-  var antipodemap = new AntipodeMap(center,divId);
-  this.bindView(antipodemap.getView());
 
   return antipodemap;
 };
 
 /* bind two dom elements (jquery selectors) to the view center*/
-AntipodeMap.prototype.bindLonLat = function(lon,lat){
-  this.getView().on('change:center',function(evt){
-    var center = ol.proj.transform(evt.target.getCenter(),'EPSG:3857','EPSG:4326');
-    $(lon).text(center[0].toFixed(4));
-    $(lat).text(center[1].toFixed(4));
+AntipodeMap.prototype.bindUI = function(opts){
+  this.map.on('moveend',function(evt){
+    var center3857 = evt.target.getView().getCenter();
+    var center = ol.proj.transform(center3857,'EPSG:3857','EPSG:4326');
+    $(opts.lonSpan).text(center[0].toFixed(4));
+    $(opts.latSpan).text(center[1].toFixed(4));
   });
+};
+
+
+/**
+ * Class to coordinate work together
+ */
+function AntipodesMaps(opts) {
+  this.opts = opts;
+  this.leftMap =  new AntipodeMap(opts.center,opts.left.div,this);
+  this.rightMap = this.leftMap.getAntipode(opts.right.div);
+
+  this.leftMap.bindUI(opts.left);
+  this.rightMap.bindUI(opts.right);
+
+  var features = {};
+  features[opts.left.div] =  null;
+  features[opts.right.div] = null;
+
+  this.features = features;
+}
+
+AntipodesMaps.prototype.updateDist = function() {
+  /** Converts numeric degrees to radians */
+  if (typeof(Number.prototype.toRad) === 'undefined') {
+    Number.prototype.toRad = function() {
+      return this * Math.PI / 180;
+    };
+  }
+
+  function haversine(lat1, lon1, lat2, lon2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1).toRad();
+    var dLong = (lon2 - lon1).toRad();
+
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * Math.sin(dLong / 2) * Math.sin(dLong / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+
+    return Math.round(d);
+  }
+
+  var lFeat = this.features[this.opts.left.div];
+  var rFeat = this.features[this.opts.right.div];
+
+  if (lFeat && rFeat){
+    // Calculate the distance
+    var lll = ol.proj.transform(lFeat.getGeometry().getCoordinates(),'EPSG:3857','EPSG:4326');
+    var rll = ol.proj.transform(rFeat.getGeometry().getCoordinates(),'EPSG:3857','EPSG:4326');
+    var dist = haversine(lll[1],lll[0],rll[1],rll[0]);
+
+    // Render the template
+    var template = $('#distance-tpl').html();
+    Mustache.parse(template);   // optional, speeds up future uses
+    var rendered = Mustache.render(template, {
+      from:lFeat.getProperties().CITY_NAME + ' (' + lFeat.getProperties().CNTRY_NAME + ')',
+      to: rFeat.getProperties().CITY_NAME + ' (' + rFeat.getProperties().CNTRY_NAME + ')',
+      dist:dist.toFixed(0)
+    });
+    $('#distance').html(rendered);
+  }
 };
 
 
 /*
   Execution starts here
 */
-
-/* define starting point */
-var galiciaCenter = ol.proj.transform([-7.2, 42.7], 'EPSG:4326', 'EPSG:3857');
-/* instance first map */
-var leftMap = new AntipodeMap(galiciaCenter,'leftmap');
-/* get the antipodes map */
-var rightMap = leftMap.getAntipode('rightmap');
-
-/* Bind lat-lons */
-leftMap.bindLonLat('#lmaplon','#lmaplat');
-rightMap.bindLonLat('#rmaplon','#rmaplat');
-
-
-
-
-
+new AntipodesMaps({
+  center: ol.proj.transform([-7.2, 42.7], 'EPSG:4326', 'EPSG:3857'),
+  left : {
+    'div':'leftmap',
+    'lonSpan':'#lmaplon',
+    'latSpan': '#lmaplat',
+    'feat': '#lfeat'
+  },
+  right : {
+    'div':'rightmap',
+    'lonSpan':'#rmaplon',
+    'latSpan': '#rmaplat',
+    'feat': '#rfeat'
+  },
+  dist: '#dist'
+});
 

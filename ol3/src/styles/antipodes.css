@@ -1,6 +1,15 @@
 body .map {
   height: 450px;
+  width: 450px;
 }
 body .maps .row {
   padding: 10px;
+}
+body .center-cross {
+  position: absolute;
+  top: 216px;
+  left: 216px;
+  width: 18px;
+  height: 18px;
+  background: url("../images/cross-18.png") no-repeat center center;
 }
