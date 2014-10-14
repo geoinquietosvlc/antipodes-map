@@ -95,6 +95,10 @@ En primer lugar se normalizan los nombres de las columnas para eliminar espacios
 | Dependente          | dependente       |
 +---------------------+------------------+
 
+.. code::
+
+   $ sed -rie '1s/.*/codigo,nome,enderezo,concello,provincia,cpostal,telf,lat,lon,titularidade,concertado,dependente/g;' raw/data_11_galicia.csv
+
 A continuación se transforman los datos para adecuarlos a las columnas necesarias en el geojson:
 
 .. code::
