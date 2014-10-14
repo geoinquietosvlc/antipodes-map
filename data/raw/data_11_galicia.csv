@@ -1,4 +1,4 @@
-Código,Nome,Enderezo,Concello,Provincia,Cód. postal,Tel&eacute;fono,Coordenada X,Coordenada Y,Titularidade,Ensino concertado,Dependente
+codigo,nome,enderezo,concello,provincia,cpostal,telf,latitude,longitude,titularidade,concertado,dependente
 36011521,CPR Vivas,"Principe, 17 - 24",Vigo,Pontevedra,36202,986227085,42.23726,-8.723809,Privada,Si,Non
 32008914,CPR Santo Cristo,Rúa San Pedro 2,Ourense,Ourense,32005,988220588,42.33639,-7.861965,Privada,Si,Non
 36010794,CPR Fillas de María Inmaculada,Avenida Vazquez Varela 57,Vigo,Pontevedra,36204,986423988,42.229263,-8.715698,Privada,Si,Non
