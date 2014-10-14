@@ -1,5 +1,11 @@
-Listado de fuentes por CCAA
+Listado de fuentes
 ===========================
+
+Existe una página web con acceso a consultas del Registro Estatal de Centros Docentes no Universitarios
+
+https://www.educacion.gob.es/centros/home.do
+
+Pero en esa web no está la geolocalización de los centros
 
 01 Andalucía
 ------------
