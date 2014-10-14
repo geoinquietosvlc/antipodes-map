@@ -300,7 +300,7 @@ new AntipodesMaps({
     'lonSpan':'#lmaplon',
     'latSpan': '#lmaplat',
     'feat': '#lfeat',
-    'data': '../data/schools_gl.geojson',
+    'data': '../data/data_gal.geojson',
     'nameProp': 'name'
   },
   right : {
@@ -308,8 +308,8 @@ new AntipodesMaps({
     'lonSpan':'#rmaplon',
     'latSpan': '#rmaplat',
     'feat': '#rfeat',
-    'data': '../data/schools_nz_2009.geojson',
-    'nameProp': 'school'
+    'data': '../data/data_nz.geojson',
+    'nameProp': 'name'
   },
   dist: '#dist'
 });

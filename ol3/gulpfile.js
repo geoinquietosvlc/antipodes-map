@@ -56,7 +56,7 @@ gulp.task('server', function() {
   connect.server({
     root: './src',
     hostname: '0.0.0.0',
-    port: 8080,
+    port: 8081,
     livereload: true
    });
 });
@@ -145,7 +145,7 @@ gulp.task('server-dist', function() {
   connect.server({
     root: './build',
     hostname: '0.0.0.0',
-    port: 8080,
+    port: 8081,
     livereload: true
   });
 });
