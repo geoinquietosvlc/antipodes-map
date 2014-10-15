@@ -99,7 +99,7 @@ gulp.task('watch', function() {
   // watch for HTML changes
   gulp.watch(['./src/*.html'],['html']);
   // watch for JS changes
-  gulp.watch(['./src/scripts/*.js'],['inject']);
+  // gulp.watch(['./src/scripts/*.js'],['inject']);
   // watch for CSS changes
   gulp.watch(['./src/styles/*.styl'],['stylus']);
   // watch for CSS changes

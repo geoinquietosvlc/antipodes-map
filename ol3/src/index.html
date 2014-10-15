@@ -58,11 +58,7 @@
 
         <div class="row">
           <div class="col-md-12">
-            <h3 id="distance">...</h3>
-            <script id="distance-tpl" type="x-tmpl-mustache">
-              {{from}} and {{to}} ar {{dist}} afar!!
-            </script>
-
+            <h3 id="distance">Pan or zoom any of the maps to see how far we are from our antipodes!</h3>
           </div>
         </div>
 
@@ -76,10 +72,15 @@
             <div class="row">
               <div class="col-md-12">
                 <div id="leftmapdetails">
+                  Center at: 
                   <ul class="list-inline">
-                    <li><code>lat: <span id="lmaplat"></span></code></li>
-                    <li><code>lon: <span id="lmaplon"></span></code></li>
+                    <li><code>lat: <span class="lat"></span></code></li>
+                    <li><code>lon: <span class="lon"></span></code></li>
                   </ul>
+
+                  <p>School: <span class="schoolname"></span></p>
+                  <p>Address: <span class="schooladdress"></span></p>
+                  <p>Distance to the center: <span class="disttocross"></span></p>
                 </div>
               </div>
             </div>
@@ -92,11 +93,16 @@
             </div>
             <div class="row">
               <div class="col-md-12">
-                <div id="leftmapdetails">
+                <div id="rightmapdetails">
+                  Center at: 
                   <ul class="list-inline">
-                    <li><code>lat: <span id="rmaplat"></span></code></li>
-                    <li><code>lon: <span id="rmaplon"></span></code></li>
+                    <li><code>lat: <span class="lat"></span></code></li>
+                    <li><code>lon: <span class="lon"></span></code></li>
                   </ul>
+
+                  <p>School: <span class="schoolname"></span></p>
+                  <p>Address: <span class="schooladdress"></span></p>
+                  <p>Distance to the center: <span class="disttocross"></span></p>
                 </div>
               </div>
             </div>
@@ -148,7 +154,7 @@
       <script src="lib/modernizr/modernizr.js"></script>
       <script src="lib/jquery/dist/jquery.js"></script>
       <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
-      <script src="lib/ol3-unofficial/ol.js"></script>
+      <script src="lib/ol3-unofficial/ol-debug.js"></script>
       <!-- endbower -->
       <!-- endbuild -->
       <!-- build:js scripts/app.min.js -->

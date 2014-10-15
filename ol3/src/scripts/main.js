@@ -51,7 +51,10 @@ function AntipodeMap(center,opts,maps){
     renderer: 'canvas',
     layers: [
       new ol.layer.Tile({
-        source: new ol.source.Stamen({layer: 'watercolor'})
+        source: new ol.source.TileJSON({
+          url: 'http://api.tiles.mapbox.com/v3/xurxosanz.jj47g6i7.jsonp',
+          crossOrigin: 'anonymous'
+        })
       })
     ],
     view: this.view
@@ -91,7 +94,6 @@ AntipodeMap.prototype.getPointsLayer = function(){
     var getText = function(feature, resolution) {
       var type = 'wrap';
       var text = feature.get(nameProp);
-      console.log( (maxResolution/resolution).toFixed(2));
 
       if (resolution > maxResolution) {
          text = '';
@@ -119,7 +121,7 @@ AntipodeMap.prototype.getPointsLayer = function(){
         anchor: [0.5, 1],
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
-        src: '../images/marker-18.png'
+        src: '../images/circle-18.png'
       })),
       text: new ol.style.Text({
           font: Math.floor(fontSize) + 'px helvetica,sans-serif',
@@ -176,7 +178,7 @@ AntipodeMap.prototype.setupOverlay = function() {
         anchor: [0.5, 1],
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
-        src: '../images/marker-18-red.png'
+        src: '../images/circle-24-red.png'
       }))})
   });
 
@@ -224,9 +226,9 @@ AntipodeMap.prototype.getAntipode = function(divId) {
 AntipodeMap.prototype.bindUI = function(opts){
   this.map.on('moveend',function(evt){
     var center3857 = evt.target.getView().getCenter();
-    var center = ol.proj.transform(center3857,'EPSG:3857','EPSG:4326');
-    $(opts.lonSpan).text(center[0].toFixed(4));
-    $(opts.latSpan).text(center[1].toFixed(4));
+    var center = ol.proj.transform(center3857,'EPSG:3857','EPSG:4326');    
+    $(opts.detailDiv + " .lon").text(center[0].toFixed(4));
+    $(opts.detailDiv + " .lat").text(center[1].toFixed(4));
   });
 };
 
@@ -276,6 +278,11 @@ AntipodesMaps.prototype.updateDist = function() {
     // Calculate the distance
     var lll = ol.proj.transform(lFeat.getGeometry().getCoordinates(),'EPSG:3857','EPSG:4326');
     var rll = ol.proj.transform(rFeat.getGeometry().getCoordinates(),'EPSG:3857','EPSG:4326');
+
+
+    var clll = ol.proj.transform(this.leftMap.getView().getCenter(),'EPSG:3857','EPSG:4326');
+    var crll = ol.proj.transform(this.rightMap.getView().getCenter(),'EPSG:3857','EPSG:4326');
+
     var dist = haversine(lll[1],lll[0],rll[1],rll[0]);
 
     // Render the template
@@ -284,6 +291,21 @@ AntipodesMaps.prototype.updateDist = function() {
         rFeat.getProperties()[this.opts.right.nameProp] + ' are ' +
         dist.toFixed(0) + ' kms away!!'
       );
+
+    // update school details 
+    $(this.opts.left.detailDiv + " .schoolname").text(lFeat.getProperties()[this.opts.left.nameProp]);
+    $(this.opts.left.detailDiv + " .schooladdress").text( rFeat.getProperties()[this.opts.left.addressProp]);
+    $(this.opts.left.detailDiv + " .disttocross").text(haversine(
+      lll[1],lll[0],
+      clll[1],clll[0]
+      ).toFixed(0)  + " kms");
+
+    $(this.opts.right.detailDiv + " .schoolname").text(lFeat.getProperties()[this.opts.right.nameProp]);
+    $(this.opts.right.detailDiv + " .schooladdress").text( rFeat.getProperties()[this.opts.right.addressProp]);
+    $(this.opts.right.detailDiv + " .disttocross").text(haversine(
+      rll[1],rll[0],
+      crll[1],crll[0]
+      ).toFixed(0)  + " kms");
   }
 };
 
@@ -297,19 +319,19 @@ new AntipodesMaps({
   maxResolution: 200,
   left : {
     'div':'leftmap',
-    'lonSpan':'#lmaplon',
-    'latSpan': '#lmaplat',
     'feat': '#lfeat',
-    'data': '../data/data_gal.geojson',
-    'nameProp': 'name'
+    'data': '../data/data_es.geojson',
+    'nameProp': 'name',
+    'addressProp': 'address',
+    'detailDiv':'#leftmapdetails'
   },
   right : {
     'div':'rightmap',
-    'lonSpan':'#rmaplon',
-    'latSpan': '#rmaplat',
     'feat': '#rfeat',
     'data': '../data/data_nz.geojson',
-    'nameProp': 'name'
+    'nameProp': 'name',
+    'addressProp': 'address',
+    'detailDiv':'#rightmapdetails'
   },
   dist: '#dist'
 });
