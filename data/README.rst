@@ -1,5 +1,11 @@
-Listado de fuentes por CCAA
+Listado de fuentes
 ===========================
+
+Existe una página web con acceso a consultas del Registro Estatal de Centros Docentes no Universitarios
+
+https://www.educacion.gob.es/centros/home.do
+
+Pero en esa web no está la geolocalización de los centros
 
 01 Andalucía
 ------------
@@ -45,6 +51,113 @@ Información obtenida en el portal de datos abiertos del Gobierno de España
 
 http://www.datosabiertos.jcyl.es/web/jcyl/risp/es/directorio/centrosdocentes/1284200521439.csv
 
+Transformación de datos
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Los datos de Colegios proporcionados por la Junta de Castilla y León no están en UTF-8 por lo que hay que realizar una conversión de los mismos:
+
+.. code::
+
+    $ iconv -f ISO8859-1 -t UTF-8 raw/data_08_cyl.csv > data_08_cyl.csv
+
+A continuación se normalizan los nombres de las columnas para eliminar espacios y carácteres extendidos de forma que tengan las siguientes equivalencias:
+
++-----------------------------+------------------+
+| **Nombre original**         | **Nuevo nombre** |
++-----------------------------+------------------+
+| CURSO ACADÉMICO             | curaca           |
++-----------------------------+------------------+
+| CÓDIGO                      | id               |
++-----------------------------+------------------+
+| C.SITUACIÓN                 | codsit           |
++-----------------------------+------------------+
+| SITUACIÓN                   | sit              |
++-----------------------------+------------------+
+| C.NATURALEZA                | codnat           |
++-----------------------------+------------------+
+| NATURALEZA                  | nat              |
++-----------------------------+------------------+
+| C.DENOMINACIÓN GENÉRICA     | coddge           |
++-----------------------------+------------------+
+| DENOMINACIÓN GENÉRICA       | dengen           |
++-----------------------------+------------------+
+| DENOMINACIÓN GENÉRICA BREVE | dengeb           |
++-----------------------------+------------------+
+| DENOMINACIÓN ESPECÍFICA     | denesp           |
++-----------------------------+------------------+
+| C.VÍA                       | codvia           |
++-----------------------------+------------------+
+| VÍA                         | via              |
++-----------------------------+------------------+
+| NOMBRE DE LA VÍA            | nomvia           |
++-----------------------------+------------------+
+| NÚMERO                      | num              |
++-----------------------------+------------------+
+| NÚMERO(EXT)                 | numext           |
++-----------------------------+------------------+
+| PISO                        | piso             |
++-----------------------------+------------------+
+| PISO(EXT)                   | pisext           |
++-----------------------------+------------------+
+| ESCALERA                    | esc              |
++-----------------------------+------------------+
+| LETRA                       | let              |
++-----------------------------+------------------+
+| C.PROV                      | codpro           |
++-----------------------------+------------------+
+| C.MUNI                      | codmun           |
++-----------------------------+------------------+
+| C.LOCA                      | codloc           |
++-----------------------------+------------------+
+| PROVINCIA                   | nompro           |
++-----------------------------+------------------+
+| MUNICIPIO                   | nommun           |
++-----------------------------+------------------+
+| LOCALIDAD                   | nomloc           |
++-----------------------------+------------------+
+| C.POSTAL                    | codpos           |
++-----------------------------+------------------+
+| TELÉFONO                    | tel              |
++-----------------------------+------------------+
+| FAX                         | fax              |
++-----------------------------+------------------+
+| LETRA                       | letb             |
++-----------------------------+------------------+
+| CORREO ELECTRÓNICO          | email            |
++-----------------------------+------------------+
+| WEB                         | web              |
++-----------------------------+------------------+
+| COORD. LONGITUD             | lon              |
++-----------------------------+------------------+
+| COORD. LATITUD              | lat              |
++-----------------------------+------------------+
+| C.R.A                       | cra              |
++-----------------------------+------------------+
+| INTERNADO                   | int              |
++-----------------------------+------------------+
+| CONCIERTO                   | con              |
++-----------------------------+------------------+
+| JORNADA CONTINUA            | jorcon           |
++-----------------------------+------------------+
+| COMEDOR                     | com              |
++-----------------------------+------------------+
+| TRANSPORTE                  | tra              |
++-----------------------------+------------------+
+|                             | field0           |
++-----------------------------+------------------+
+
+.. code::
+
+   $ sed -ie '1s/.*/curaca;id;codsit;sit;codnat;nat;coddge;dengen;dengeb;denesp;codvia;via;nomvia;num;numext;piso;pisext;esc;let;codpro;codmun;codloc;nompro;nommun;nomloc;codpos;tel;fax;letb;email;web;lon;lat;cra;int;con;jorcon;com;tra;field0/g;' data_08_cyl.csv
+   $ < data_08_cyl.csv csvformat -d ";" > raw/data_08_cyl.csv
+
+A continuación se transforman los datos para adecuarlos a las columnas necesarias en el geojson:
+
+.. code::
+
+   $ < raw/data_08_cyl.csv csvsql --blanks --no-inference --query "SELECT id, denesp as name, via || ' ' || nomvia || ', ' || CASE WHEN num IS NULL THEN numext ELSE num END || ', ' || nommun || ', ' || codpos || ' ' || nompro as address, REPLACE(lon,',','.') as lon, REPLACE(lat,',','.') as lat FROM stdin;" > data_cyl.csv
+
+
 09 Cataluña
 -----------
 
@@ -65,10 +178,10 @@ http://abertos.xunta.es/catalogo/ensino-formacion/-/dataset/0257/centros-educati
 Transformación de datos
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-En primer lugar se normalizan los nombres de las columnas para eliminar espacios y carácteres extendidos de forma que queden de la siguiente forma:
+En primer lugar se normalizan los nombres de las columnas para eliminar espacios y carácteres extendidos de forma que tengan las siguientes equivalencias:
 
 +---------------------+------------------+
-| **nombre anterior** | **nuevo nombre** |
+| **Nombre original** | **Nuevo nombre** |
 +---------------------+------------------+
 | Código              | codigo           |
 +---------------------+------------------+
@@ -105,26 +218,6 @@ A continuación se transforman los datos para adecuarlos a las columnas necesari
 
     $ < raw/data_11_galicia.csv csvsql --query "SELECT codigo as id, nome as name, enderezo || ' ' || concello || ' ' || cpostal || ' ' || provincia as address, lon, lat FROM stdin"> data_gal.csv
 
-Para la conversión a geojson hace falta crear un archivo .vrt con la siguiente información:
-
-.. code:: xml
-
-    <OGRVRTDataSource>
-        <OGRVRTLayer name="data_gal">
-            <SrcDataSource>data_gal.csv</SrcDataSource>
-            <GeometryType>wkbPoint</GeometryType>
-            <LayerSRS>WGS84</LayerSRS>
-            <GeometryField encoding="PointFromColumns" x="lon" y="lat"/>
-        </OGRVRTLayer>
-    </OGRVRTDataSource>
-
-Y por último se crean el archivo geojson con los datos.
-
-.. code::
-
-   $ ogr2ogr -f GEOJson data_gal.geojson data_gal.vrt
-
-
 12 Madrid
 ---------
 
@@ -156,6 +249,35 @@ http://www.cece.gva.es/ocd/areacd/bd/registre.ods
 
 19 Melilla
 ----------
+
+Unión de España
+---------------
+
+En primer lugar se unen los csv de las distintas comunidades
+
+.. code::
+
+    $ csvstack data_*.csv > data_es.csv
+
+
+Para la conversión a geojson hace falta crear un archivo .vrt con la siguiente información:
+
+.. code:: xml
+
+    <OGRVRTDataSource>
+        <OGRVRTLayer name="data_es">
+            <SrcDataSource>data_es.csv</SrcDataSource>
+            <GeometryType>wkbPoint</GeometryType>
+            <LayerSRS>WGS84</LayerSRS>
+            <GeometryField encoding="PointFromColumns" x="lon" y="lat"/>
+        </OGRVRTLayer>
+    </OGRVRTDataSource>
+
+Y por último se crean el archivo geojson con los datos.
+
+.. code::
+
+   $ ogr2ogr -f GEOJson data_es.geojson data_es.vrt
 
 Nueva Zelanda
 -------------
