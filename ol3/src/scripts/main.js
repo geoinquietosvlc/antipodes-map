@@ -108,17 +108,17 @@ AntipodeMap.prototype.getPointsLayer = function(){
       return text;
     };
 
-    var fontSize = 12;
-    if(resolution<=maxResolution*0.5) {
-        fontSize = fontSize*0.8;
-    } else if(resolution<=maxResolution*0.6) {
-        fontSize = fontSize*0.9;
+    var fontSize = 13;
+    if(resolution > 100) {
+        fontSize = 10;
+    } else if(resolution > 80) {
+        fontSize = 12;
     }
 
     return [new ol.style.Style({
       image: new ol.style.Icon(({
-        scale: 1,
-        anchor: [0.5, 1],
+        scale: resolution < 1500 ? 0.8 : 0.2,
+        anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
         src: '../images/circle-18.png'
@@ -126,12 +126,13 @@ AntipodeMap.prototype.getPointsLayer = function(){
       text: new ol.style.Text({
           font: Math.floor(fontSize) + 'px helvetica,sans-serif',
           text: getText(feature, resolution),
+          offsetY: -12,
           fill: new ol.style.Fill({
               color: '#000'
           }),
           stroke: new ol.style.Stroke({
               color: '#fff',
-              width: 2
+              width: 3
           })
       })
     })];
@@ -175,7 +176,7 @@ AntipodeMap.prototype.setupOverlay = function() {
     style: new ol.style.Style({
       image: new ol.style.Icon(({
         scale: 1,
-        anchor: [0.5, 1],
+        anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
         src: '../images/circle-24-red.png'
@@ -294,13 +295,13 @@ AntipodesMaps.prototype.updateDist = function() {
 
     // update school details 
     $(this.opts.left.detailDiv + " .schoolname").text(lFeat.getProperties()[this.opts.left.nameProp]);
-    $(this.opts.left.detailDiv + " .schooladdress").text( rFeat.getProperties()[this.opts.left.addressProp]);
+    $(this.opts.left.detailDiv + " .schooladdress").text( lFeat.getProperties()[this.opts.left.addressProp]);
     $(this.opts.left.detailDiv + " .disttocross").text(haversine(
       lll[1],lll[0],
       clll[1],clll[0]
       ).toFixed(0)  + " kms");
 
-    $(this.opts.right.detailDiv + " .schoolname").text(lFeat.getProperties()[this.opts.right.nameProp]);
+    $(this.opts.right.detailDiv + " .schoolname").text(rFeat.getProperties()[this.opts.right.nameProp]);
     $(this.opts.right.detailDiv + " .schooladdress").text( rFeat.getProperties()[this.opts.right.addressProp]);
     $(this.opts.right.detailDiv + " .disttocross").text(haversine(
       rll[1],rll[0],
@@ -314,8 +315,8 @@ AntipodesMaps.prototype.updateDist = function() {
   Execution starts here
 */
 new AntipodesMaps({
-  center: ol.proj.transform([ -8.0075, 42.8210 ], 'EPSG:4326', 'EPSG:3857'),
-  zoom: 8,
+  center: ol.proj.transform([  -7.0247 , 40.7536 ], 'EPSG:4326', 'EPSG:3857'),
+  zoom: 5,
   maxResolution: 200,
   left : {
     'div':'leftmap',
