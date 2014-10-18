@@ -93,57 +93,20 @@ AntipodeMap.prototype.antipode = function(center){
 AntipodeMap.prototype.getPointsLayer = function(){
   /* define a styling function to draw a maki marker
     icon and a label with the city name */
-  var nameProp = this.opts.nameProp;
-  var maxResolution = this.maps.opts.maxResolution;
-  var trunc = this.maps.opts.lableTrunc || 12;
   var styleFunction = function(feature,resolution){
-
-    var getText = function(feature, resolution) {
-      var type = 'wrap';
-      var text = feature.get(nameProp);
-
-      if (resolution > maxResolution) {
-         text = '';
-      } else if(resolution<=maxResolution*0.7) {
-          text = text;
-      } else if(resolution<=maxResolution*0.8) {
-          text = text.trunc(12);
-      } else if(resolution<=maxResolution*0.9) {
-          text = text.trunc(16);
-      }
-
-      return text;
-    };
-
-    var fontSize = 13;
-    if(resolution > 100) {
-        fontSize = 10;
-    } else if(resolution > 80) {
-        fontSize = 12;
-    }
-
     return [new ol.style.Style({
-      image: new ol.style.Icon(({
-        scale: resolution < 1500 ? 0.8 : 0.2,
-        anchor: [0.5, 0.5],
-        anchorXUnits: 'fraction',
-        anchorYUnits: 'fraction',
-        src: '../images/circle-18.png'
-      })),
-      text: new ol.style.Text({
-          font: Math.floor(fontSize) + 'px helvetica,sans-serif',
-          text: getText(feature, resolution),
-          offsetY: -12,
-          fill: new ol.style.Fill({
-              color: '#000'
-          }),
-          stroke: new ol.style.Stroke({
-              color: '#fff',
-              width: 3
-          })
+      image: new ol.style.Circle({
+        radius: resolution < 150 ? 8 : 2 ,
+        fill: new ol.style.Fill({color: 'rgba(100, 100, 100, 1)'}),
+        stroke: new ol.style.Stroke({
+            color: 'rgba(225, 225, 225, 1)',
+            width: resolution < 150 ? 2 : 0 })
       })
     })];
   };
+
+
+
 
   var pointsLayer = new ol.layer.Vector({
     source: new ol.source.GeoJSON({
@@ -175,27 +138,86 @@ AntipodeMap.prototype.displayClosestCity = function(center,source,featureOverlay
   }
 };
 
+AntipodeMap.prototype.displayLabel = function(feature,featureOverlay) {
+  var labeled = this.labeled;
+  if (feature !== labeled) {
+    if (labeled) {
+      featureOverlay.removeFeature(labeled);
+    }
+    if (feature) {
+      featureOverlay.addFeature(feature);
+    }
+  }
+  this.labeled = feature;
+};
+
 AntipodeMap.prototype.setupOverlay = function() {
+
   var layer = this.pointsLayer;
   var context = this;
+  var map = this.map;
+  var mapOpts = this.maps.opts;
+  var nameProp = this.opts.nameProp;
+
+  var styleFunction = function(feature, resolution){
+    var fontSize = 14;
+    return [new ol.style.Style({
+       image: new ol.style.Circle({
+        radius: resolution < 300 ? 12 : 4 ,
+        fill: new ol.style.Fill({color: 'rgba(164, 0, 0, 1)'}),
+        stroke: new ol.style.Stroke({
+            color: 'rgba(255, 255, 255, 1)',
+            width: resolution < 300 ? 2 : 0 })
+      }),
+      text: new ol.style.Text({
+          font: 'bold ' + fontSize + 'px helvetica, sans-serif',
+          text: feature.get(nameProp),
+          offsetY: fontSize * -1,
+          fill: new ol.style.Fill({
+              color: '#204a87'
+          }),
+          stroke: new ol.style.Stroke({
+              color: '#fff',
+              width: 4
+          })
+      })
+    })];
+  };
+
   var featureOverlay = new ol.FeatureOverlay({
-    map: this.map,
-    style: new ol.style.Style({
-      image: new ol.style.Icon(({
-        scale: 1,
-        anchor: [0.5, 0.5],
-        anchorXUnits: 'fraction',
-        anchorYUnits: 'fraction',
-        src: '../images/circle-24-red.png'
-      }))})
+    map: map,
+    style: styleFunction
   });
 
-  this.map.on('moveend',function(){
+  map.on('moveend',function(){
     var center = this.getView().getCenter();
     if (layer && layer.getSource() && layer.getSource().getFeatures().length>0){
        context.displayClosestCity(center,layer.getSource(),featureOverlay);
     }
   });
+
+
+  $(map.getViewport()).on('mousemove', function(evt) {
+    var pixel = map.getEventPixel(evt.originalEvent);
+    var feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+      context.displayLabel(feature,featureOverlay);
+    });
+  });
+
+  // move to center if feature is clicked
+  map.on('click', function(evt) {
+    var feature = map.forEachFeatureAtPixel(evt.pixel,
+        function(feature, layer) {
+          return feature;
+        });
+    if (feature) {
+      console.log(feature)
+      var geometry = feature.getGeometry();
+      var coord = geometry.getCoordinates();
+      map.getView().setCenter(coord);
+    }
+  });
+
 };
 
 
