@@ -52,7 +52,7 @@ function AntipodeMap(center,opts,maps){
     layers: [
       new ol.layer.Tile({
         source: new ol.source.TileJSON({
-          url: 'http://api.tiles.mapbox.com/v3/xurxosanz.jj47g6i7.jsonp',
+          url: 'http://api.tiles.mapbox.com/v3/vehrka.k03kl0gg.jsonp',
           crossOrigin: 'anonymous'
         })
       })
@@ -72,6 +72,13 @@ function AntipodeMap(center,opts,maps){
 AntipodeMap.prototype.getView = function(){
   return this.view;
 };
+
+
+/* just access to the map view in geographical*/
+AntipodeMap.prototype.getViewGeoPoint = function(){
+  return ol.proj.transform(this.getView().getCenter(),'EPSG:3857','EPSG:4326');
+};
+
 
 /* function to compute the antipodes of a 3857 coordinate */
 AntipodeMap.prototype.antipode = function(center){
@@ -227,7 +234,7 @@ AntipodeMap.prototype.getAntipode = function(divId) {
 AntipodeMap.prototype.bindUI = function(opts){
   this.map.on('moveend',function(evt){
     var center3857 = evt.target.getView().getCenter();
-    var center = ol.proj.transform(center3857,'EPSG:3857','EPSG:4326');    
+    var center = ol.proj.transform(center3857,'EPSG:3857','EPSG:4326');
     $(opts.detailDiv + " .lon").text(center[0].toFixed(4));
     $(opts.detailDiv + " .lat").text(center[1].toFixed(4));
   });
@@ -260,7 +267,89 @@ AntipodesMaps.prototype.updateDist = function() {
     };
   }
 
-  function haversine(lat1, lon1, lat2, lon2) {
+  var WGS84 = {a : 6378137, b : 6356752.314245, f : 1 / 298.257223563};
+
+  function xyzDist(from,to){
+    var cartesian = function(point){
+      var lat = point[1], lon = point[0];
+      var φ = lat.toRad(), λ = lon.toRad(), H = 0;
+      var a = WGS84.a, b = WGS84.b;
+
+      var sinφ = Math.sin(φ), cosφ = Math.cos(φ);
+      var sinλ = Math.sin(λ), cosλ = Math.cos(λ);
+
+      var eSq = (a*a - b*b) / (a*a);
+      var ν = a / Math.sqrt(1 - eSq*sinφ*sinφ);
+
+      var x = (ν+H) * cosφ * cosλ;
+      var y = (ν+H) * cosφ * sinλ;
+      var z = ((1-eSq)*ν + H) * sinφ;
+
+      var pointXYZ = {x:x,y:y,z:z};
+
+      return pointXYZ;
+    };
+
+    var sqDif = function(a,b){return Math.pow (a - b,2)};
+
+    var fromC = cartesian(from), toC = cartesian(to);
+
+    return Math.sqrt(sqDif(fromC.x,toC.x) + sqDif(fromC.y,toC.y) + sqDif(fromC.z,toC.z))/1000;
+  }
+
+  /**
+   * Code from http://jsperf.com/vincenty-vs-haversine-distance-calculations
+   *
+   * Calculates geodetic distance between two points specified by latitude/longitude using
+   * Vincenty inverse formula for ellipsoids
+   *
+   * @param   {Number} lat1, lon1: first point in decimal degrees
+   * @param   {Number} lat2, lon2: second point in decimal degrees
+   * @returns (Number} distance in metres between points
+   */
+
+  function distVincenty(lat1, lon1, lat2, lon2) {
+    var a = WGS84.a,
+        b = WGS84.b,
+        f = WGS84.f; // WGS-84 ellipsoid params
+    var L = (lon2 - lon1).toRad();
+    var U1 = Math.atan((1 - f) * Math.tan(lat1.toRad()));
+    var U2 = Math.atan((1 - f) * Math.tan(lat2.toRad()));
+    var sinU1 = Math.sin(U1),
+        cosU1 = Math.cos(U1);
+    var sinU2 = Math.sin(U2),
+        cosU2 = Math.cos(U2);
+
+    var lambda = L,
+        lambdaP, iterLimit = 300;
+    do {
+      var sinLambda = Math.sin(lambda),
+          cosLambda = Math.cos(lambda);
+      var sinSigma = Math.sqrt((cosU2 * sinLambda) * (cosU2 * sinLambda) + (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
+      if (sinSigma == 0) return 0; // co-incident points
+      var cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
+      var sigma = Math.atan2(sinSigma, cosSigma);
+      var sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
+      var cosSqAlpha = 1 - sinAlpha * sinAlpha;
+      var cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha;
+      if (isNaN(cos2SigmaM)) cos2SigmaM = 0; // equatorial line: cosSqAlpha=0 (§6)
+      var C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha));
+      lambdaP = lambda;
+      lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
+    } while (Math.abs(lambda - lambdaP) > 1e-9 && --iterLimit > 0);
+
+    if (iterLimit == 0) return NaN // formula failed to converge
+    var uSq = cosSqAlpha * (a * a - b * b) / (b * b);
+    var A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
+    var B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+    var deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) - B / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
+    var s = b * A * (sigma - deltaSigma);
+
+    return s/1000;
+  }
+
+  // Distance in kilometers between two points using the Haversine algo.
+  function harvesine(lat1, lon1, lat2, lon2) {
     var R = 6371;
     var dLat = (lat2 - lat1).toRad();
     var dLong = (lon2 - lon1).toRad();
@@ -272,41 +361,50 @@ AntipodesMaps.prototype.updateDist = function() {
     return Math.round(d);
   }
 
+  function distance(from,to,isVicenty){
+    if (isVicenty){
+      return distVincenty(from[1],from[0],to[1],to[0]);
+    } else {
+      return harvesine(from[1],from[0],to[1],to[0]);
+    }
+  }
+
+  function getGeoPoint(feature){
+    return ol.proj.transform(feature.getGeometry().getCoordinates(),'EPSG:3857','EPSG:4326');
+  }
+
   var lFeat = this.features[this.opts.left.div];
   var rFeat = this.features[this.opts.right.div];
 
   if (lFeat && rFeat){
-    // Calculate the distance
-    var lll = ol.proj.transform(lFeat.getGeometry().getCoordinates(),'EPSG:3857','EPSG:4326');
-    var rll = ol.proj.transform(rFeat.getGeometry().getCoordinates(),'EPSG:3857','EPSG:4326');
+    // Get the geodesic points
 
+    // features
+    var lll = getGeoPoint(lFeat);
+    var rll = getGeoPoint(rFeat);
 
-    var clll = ol.proj.transform(this.leftMap.getView().getCenter(),'EPSG:3857','EPSG:4326');
-    var crll = ol.proj.transform(this.rightMap.getView().getCenter(),'EPSG:3857','EPSG:4326');
+    // views
+    var clll = this.leftMap.getViewGeoPoint();
+    var crll = this.rightMap.getViewGeoPoint();
 
-    var dist = haversine(lll[1],lll[0],rll[1],rll[0]);
 
     // Render the template
     $('#distance').html(
         lFeat.getProperties()[this.opts.left.nameProp] + ' and ' +
         rFeat.getProperties()[this.opts.right.nameProp] + ' are ' +
-        dist.toFixed(0) + ' kms away!!'
+        distance(lll,rll,false).toFixed(0) + ' kms away!! (' +
+        xyzDist(lll,rll).toFixed(1) + ' km as a tunnel)'
       );
 
-    // update school details 
-    $(this.opts.left.detailDiv + " .schoolname").text(lFeat.getProperties()[this.opts.left.nameProp]);
-    $(this.opts.left.detailDiv + " .schooladdress").text( lFeat.getProperties()[this.opts.left.addressProp]);
-    $(this.opts.left.detailDiv + " .disttocross").text(haversine(
-      lll[1],lll[0],
-      clll[1],clll[0]
-      ).toFixed(0)  + " kms");
+    // update school details
+    var updateDetails = function(opts,feature,center){
+      $(opts.detailDiv + " .schoolname").text(feature.getProperties()[opts.nameProp]);
+      $(opts.detailDiv + " .schooladdress").text( feature.getProperties()[opts.addressProp]);
+      $(opts.detailDiv + " .disttocross").text(distance(getGeoPoint(feature),center,true).toFixed(1)  + " kms");
+    }
 
-    $(this.opts.right.detailDiv + " .schoolname").text(rFeat.getProperties()[this.opts.right.nameProp]);
-    $(this.opts.right.detailDiv + " .schooladdress").text( rFeat.getProperties()[this.opts.right.addressProp]);
-    $(this.opts.right.detailDiv + " .disttocross").text(haversine(
-      rll[1],rll[0],
-      crll[1],crll[0]
-      ).toFixed(0)  + " kms");
+    updateDetails(this.opts.left,lFeat,clll);
+    updateDetails(this.opts.right,rFeat,crll);
   }
 };
 
