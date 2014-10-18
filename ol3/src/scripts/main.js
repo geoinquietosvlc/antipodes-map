@@ -211,10 +211,21 @@ AntipodeMap.prototype.setupOverlay = function() {
           return feature;
         });
     if (feature) {
-      console.log(feature)
       var geometry = feature.getGeometry();
       var coord = geometry.getCoordinates();
-      map.getView().setCenter(coord);
+
+      // Move to that coordinates and zoom
+      var elastic = function(t) {
+        return Math.pow(2, -13 * t) * Math.sin((t - 0.025) * (2 * Math.PI) / 0.2) + 1;
+      }
+      var pan = ol.animation.pan({
+        duration: 1000,
+        //easing: elastic,
+        source: (this.getView().getCenter())
+      });
+      this.beforeRender(pan);
+      this.getView().setZoom(10);
+      this.getView().setCenter(coord);
     }
   });
 
@@ -420,8 +431,8 @@ AntipodesMaps.prototype.updateDist = function() {
 
     // update school details
     var updateDetails = function(opts,feature,center){
-      $(opts.detailDiv + " .schoolname").text(feature.getProperties()[opts.nameProp]);
-      $(opts.detailDiv + " .schooladdress").text( feature.getProperties()[opts.addressProp]);
+      $(opts.detailDiv + " .schoolname").text(feature.getProperties()[opts.nameProp || '...']);
+      $(opts.detailDiv + " .schooladdress").text( feature.getProperties()[opts.addressProp] || '...');
       $(opts.detailDiv + " .disttocross").text(distance(getGeoPoint(feature),center,true).toFixed(1)  + " kms");
     }
 
