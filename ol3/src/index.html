@@ -14,6 +14,7 @@
         <!-- bower:css -->
         <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="lib/ol3-unofficial/ol.css" />
+        <link rel="stylesheet" href="lib/selectize/dist/css/selectize.bootstrap3.css" />
         <!-- endbower -->
         <!-- inject:css -->
         <link rel="stylesheet" href="/styles/antipodes.css">
@@ -59,6 +60,21 @@
         <div class="row">
           <div class="col-md-12">
             <h3 id="distance">Pan or zoom any of the maps to see how far we are from our antipodes!</h3>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="control-group">
+            <select id="select-school-leftmap" placeholder="Select a school...">
+            </select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="control-group">
+            <select id="select-school-rightmap" placeholder="Select a school...">
+            </select>
+            </div>
           </div>
         </div>
 
@@ -169,6 +185,7 @@
       <script src="lib/jquery/dist/jquery.js"></script>
       <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
       <script src="lib/ol3-unofficial/ol-debug.js"></script>
+      <script src="lib/selectize/dist/js/standalone/selectize.js"></script>
       <!-- endbower -->
       <!-- endbuild -->
       <!-- build:js scripts/app.min.js -->

@@ -105,15 +105,43 @@ AntipodeMap.prototype.getPointsLayer = function(){
     })];
   };
 
-
-
-
   var pointsLayer = new ol.layer.Vector({
     source: new ol.source.GeoJSON({
       url: this.opts.data,
       projection: 'EPSG:3857'
     }),
     style: styleFunction
+  });
+
+
+  // Fill the select with features
+  var context = this;
+
+  pointsLayer.on('change', function(event) {
+    console.log(pointsLayer.getSource().getFeatures().length);
+
+    var features = pointsLayer.getSource().getFeatures();
+    var select =  $('#select-school-' + context.opts.div);
+
+    $.each(features, function (index, feature) {
+      select.append($('<option/>', {
+        value: feature.getProperties()[context.opts.idProp || 'id'],
+        text : feature.getProperties()[context.opts.nameProp || 'name'],
+      }));
+    });
+    select.selectize({});
+
+    select.on('change', function (e) {
+        var optionSelected = $("option:selected", this);
+        var valueSelected = this.value;
+        var f = features.filter(function(f){
+          return f.getProperties()['id'] === valueSelected}
+        );
+        if (f.length>0){
+          var coords = f[0].getGeometry().getCoordinates();
+          context.moveMap(coords);
+        }
+    });
   });
 
   return pointsLayer;
@@ -137,6 +165,17 @@ AntipodeMap.prototype.displayClosestCity = function(center,source,featureOverlay
     this.maps.updateDist();
   }
 };
+
+AntipodeMap.prototype.moveMap = function(coord){
+  var pan = ol.animation.pan({
+    duration: 1000,
+    //easing: elastic,
+    source: (this.getView().getCenter())
+  });
+  this.map.beforeRender(pan);
+  this.map.getView().setZoom(10);
+  this.map.getView().setCenter(coord);
+}
 
 AntipodeMap.prototype.displayLabel = function(feature,featureOverlay) {
   var labeled = this.labeled;
@@ -215,17 +254,7 @@ AntipodeMap.prototype.setupOverlay = function() {
       var coord = geometry.getCoordinates();
 
       // Move to that coordinates and zoom
-      var elastic = function(t) {
-        return Math.pow(2, -13 * t) * Math.sin((t - 0.025) * (2 * Math.PI) / 0.2) + 1;
-      }
-      var pan = ol.animation.pan({
-        duration: 1000,
-        //easing: elastic,
-        source: (this.getView().getCenter())
-      });
-      this.beforeRender(pan);
-      this.getView().setZoom(10);
-      this.getView().setCenter(coord);
+      context.moveMap(coord);
     }
   });
 
