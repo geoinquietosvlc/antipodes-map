@@ -1,15 +1,43 @@
 body .map {
-  height: 450px;
-  width: 450px;
+  height: 300px;
+  width: 100%;
 }
 body .maps .row {
-  padding: 10px;
+  padding: 0 10px;
 }
 body .center-cross {
   position: absolute;
-  top: 216px;
-  left: 216px;
+  top: 141px;
+  left: 41%;
   width: 18px;
   height: 18px;
   background: url("../images/cross-18.png") no-repeat center center;
+}
+body .panel {
+  margin-top: 15px;
+  padding: 5px;
+}
+body .panel-body {
+  padding: 5px;
+}
+body .panel-body .row {
+  padding: 0 10px;
+}
+body .panel-body .schooldata {
+  text-align: right;
+}
+body .panel-body p {
+  margin: 0;
+}
+body .panel-body > .row {
+  padding: 10px 5px;
+}
+body .title-distances {
+  margin: -5px;
+}
+body .title-distances .panel {
+  margin-top: 0;
+}
+body .title-distances .panel h3 {
+  margin: 0;
 }

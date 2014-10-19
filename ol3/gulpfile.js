@@ -105,7 +105,7 @@ gulp.task('watch', function() {
   // watch for CSS changes
   gulp.watch(['./src/styles/*.css'],['css','inject']);
   // watch bower
-  gulp.watch(['./bower.json'], ['wiredep']);
+  // gulp.watch(['./bower.json'], ['wiredep']);
 });
 
 /* Default task */

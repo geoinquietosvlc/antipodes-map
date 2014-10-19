@@ -15,6 +15,7 @@
         <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="lib/ol3-unofficial/ol.css" />
         <link rel="stylesheet" href="lib/selectize/dist/css/selectize.bootstrap3.css" />
+        <link rel="stylesheet" href="lib/bootstrap-tour/build/css/bootstrap-tour.css" />
         <!-- endbower -->
         <!-- inject:css -->
         <link rel="stylesheet" href="/styles/antipodes.css">
@@ -46,6 +47,11 @@
               <!-- Collect the nav links, forms, and other content for toggling -->
               <div class="collapse navbar-collapse" id="myNavBar">
                 <ul class="nav navbar-nav navbar-right">
+                      <li><a
+                      id="help"
+                      style="display:none;"
+                      href="javascript:void(0)"
+                      onclick="showHelp();">Take a tour</a></li>
                       <li><a data-toggle="modal" data-target="#about" href="#">About</a></li>
                       <li><a href="https://github.com/geoinquietosvlc/antipodes-map">Repo</a></li>
                       <li><a data-toggle="modal" data-target="#contact" href="#">Contact</a></li>
@@ -55,29 +61,6 @@
           </nav>
         </header>
 
-
-
-        <div class="row">
-          <div class="col-md-12">
-            <h3 id="distance">Pan or zoom any of the maps to see how far we are from our antipodes!</h3>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="control-group">
-            <select id="select-school-leftmap" placeholder="Select a school...">
-            </select>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="control-group">
-            <select id="select-school-rightmap" placeholder="Select a school...">
-            </select>
-            </div>
-          </div>
-        </div>
-
         <div class="row maps">
           <div class="col-md-6">
             <div class="row">
@@ -86,22 +69,42 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-md-9">
+              <div class="col-md-12">
                 <div id="leftmapdetails">
-                  Center at:
-                  <ul class="list-inline">
-                    <li><code>lat: <span class="lat"></span></code></li>
-                    <li><code>lon: <span class="lon"></span></code></li>
-                  </ul>
                   <div class="panel panel-primary">
-                    <div class="panel-heading">
-                      <h3 class="panel-title"><span class="schoolname">...</span></h3>
-                    </div>
                     <div class="panel-body">
-                      <p><strong>Address:</strong>
-                        <br/><span class="schooladdress">&nbsp;</span></p>
-                      <p><strong>Distance to the center:<br/>
-                        </strong> <span class="disttocross">&nbsp;</span></p>
+                      <div class="row  selecting-school">
+                        <div class="col-md-9 control-group">
+                          <select style="display:none;"
+                            class="select-school" placeholder="Select a school...">
+                            <option>Select a school...</option>
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <button type="button" class="btn btn-primary">Go</button>
+                        </div>
+                      </div>
+                      <div class="row lanlot">
+                          <div class="col-md-9">
+                            <p style="min-height:65px;"><strong>Address:</strong>
+                              <br/><span class="schooladdress">&nbsp;</span></p>
+                          </div>
+                          <div class="col-md-3">
+                            <p><strong>Coordinates:</strong><br/>
+                              <code>lat: <span class="lat"></span></code><br/>
+                              <code>lon: <span class="lon"></span></code></p>
+                          </div>
+                      </div>
+                      <div class="row directionToCenter">
+                        <div class="col-md-6">
+                          <p><strong>Distance to the center:
+                           </strong> <code class="disttocross">&nbsp;</code></p>
+                        </div>
+                        <div class="col-md-6">
+                          <p><strong>Direction:
+                            </strong> <code class="direction">&nbsp;</code></p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -115,22 +118,41 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-md-9">
-                <div id="rightmapdetails">
-                  Center at:
-                  <ul class="list-inline">
-                    <li><code>lat: <span class="lat"></span></code></li>
-                    <li><code>lon: <span class="lon"></span></code></li>
-                  </ul>
-                  <div class="panel panel-primary">
-                    <div class="panel-heading">
-                      <h3 class="panel-title"><span class="schoolname">...</span></h3>
-                    </div>
+              <div class="col-md-12">
+                <div id="rightmapdetails"><div class="panel panel-primary">
                     <div class="panel-body">
-                      <p><strong>Address:</strong>
-                        <br/><span class="schooladdress">&nbsp;</span></p>
-                      <p><strong>Distance to the center:<br/>
-                        </strong> <span class="disttocross">&nbsp;</span></p>
+                      <div class="row  selecting-school">
+                        <div class="col-md-9 control-group">
+                          <select style="display:none;"
+                            class="select-school" placeholder="Select a school...">
+                            <option>Select a school...</option>
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <button type="button" class="btn btn-primary">Go</button>
+                        </div>
+                      </div>
+                      <div class="row lanlot">
+                          <div class="col-md-9">
+                            <p style="min-height:65px;"><strong>Address:</strong>
+                              <br/><span class="schooladdress">&nbsp;</span></p>
+                          </div>
+                          <div class="col-md-3">
+                            <p><strong>Coordinates:</strong><br/>
+                              <code>lat: <span class="lat"></span></code><br/>
+                              <code>lon: <span class="lon"></span></code></p>
+                          </div>
+                      </div>
+                      <div class="row directionToCenter">
+                        <div class="col-md-6">
+                          <p><strong>Distance to the center:
+                           </strong> <code class="disttocross">&nbsp;</code></p>
+                        </div>
+                        <div class="col-md-6">
+                          <p><strong>Direction:
+                            </strong> <code class="direction">&nbsp;</code></p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -138,8 +160,15 @@
             </div>
           </div>
         </div>
-
-
+        <div class="row title-distances">
+          <div class="col-md-12">
+            <div class="panel panel-primary">
+              <div class="panel-body">
+                <h4 id="distance">&nbsp;</h4>
+              </div>
+            </div>
+          </div>
+        </div>
       </div> <!-- /container -->
 
       <!-- About -->
@@ -184,12 +213,17 @@
       <script src="lib/modernizr/modernizr.js"></script>
       <script src="lib/jquery/dist/jquery.js"></script>
       <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
-      <script src="lib/ol3-unofficial/ol-debug.js"></script>
       <script src="lib/selectize/dist/js/standalone/selectize.js"></script>
+      <script src="lib/bootstrap-tour/build/js/bootstrap-tour.js"></script>
+      <script src="lib/ol3-unofficial/ol-debug.js"></script>
       <!-- endbower -->
       <!-- endbuild -->
       <!-- build:js scripts/app.min.js -->
       <!-- inject:js -->
+      <script src="/scripts/prototypes.js"></script>
+      <script src="/scripts/antipodemap.js"></script>
+      <script src="/scripts/antipodemaps.js"></script>
+      <script src="/scripts/help.js"></script>
       <script src="/scripts/main.js"></script>
       <!-- endinject -->
       <!-- endbuild -->
