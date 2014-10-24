@@ -11,7 +11,7 @@ BEGIN
     END IF;
     Y:= ST_Y(geom) * -1;
 
-    stm:= E'SELECT st_geomfromtext(\'POINT(' || X || ' ' || Y || E')\')';
-    EXECUTE stm INTO point;
+    point:= st_geomfromtext('POINT(' || X || ' ' || Y || E')');
+    
 END;
 $$ LANGUAGE'plpgsql' STRICT IMMUTABLE
