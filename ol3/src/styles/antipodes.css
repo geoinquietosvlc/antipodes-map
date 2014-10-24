@@ -41,3 +41,7 @@ body .title-distances .panel {
 body .title-distances .panel h3 {
   margin: 0;
 }
+body #about .modal-dialog {
+  width: 800px;
+  max-width: 80%;
+}
