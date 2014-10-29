@@ -75,6 +75,7 @@ AntipodeMap.prototype.getPointsLayer = function(){
     })];
   };
 
+  /*
   var pointsLayer = new ol.layer.Vector({
     source: new ol.source.GeoJSON({
       url: this.opts.data,
@@ -82,14 +83,23 @@ AntipodeMap.prototype.getPointsLayer = function(){
     }),
     style: styleFunction
   });
-
+  */ 
+  var pointsLayer = new ol.layer.Image({
+      source: new ol.source.ImageVector({
+        source: new ol.source.GeoJSON({
+          projection: 'EPSG:3857',
+          url: this.opts.data,
+        }),
+        style: styleFunction
+      })
+    })
 
   // Fill the select with features
   var context = this;
 
   pointsLayer.on('change', function(event) {
 
-    var features = pointsLayer.getSource().getFeatures();
+    var features = pointsLayer.getSource().getSource().getFeatures();
     var optionSelector = context.opts.detailDiv + ' .select-school';
     var select =  $(optionSelector);
     var button =  $(context.opts.detailDiv + " button");
@@ -200,8 +210,8 @@ AntipodeMap.prototype.setupOverlay = function() {
 
   map.on('moveend',function(){
     var center = this.getView().getCenter();
-    if (layer && layer.getSource() && layer.getSource().getFeatures().length>0){
-       context.displayClosestCity(center,layer.getSource(),featureOverlay);
+    if (layer && layer.getSource() && layer.getSource().getSource() &&  layer.getSource().getSource().getFeatures().length>0){
+       context.displayClosestCity(center,layer.getSource().getSource(),featureOverlay);
     }
   });
 
