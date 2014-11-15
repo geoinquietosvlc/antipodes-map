@@ -33,7 +33,13 @@ function AntipodeMap(center,opts,maps){
 
   /* add the cities vector layer */
   this.pointsLayer = this.getPointsLayer();
+
+  if (this.opts.layer){
+    this.map.addLayer(this.opts.layer);
+  }
   this.map.addLayer(this.pointsLayer);
+
+
 
   this.setupOverlay();
 }
@@ -83,7 +89,7 @@ AntipodeMap.prototype.getPointsLayer = function(){
     }),
     style: styleFunction
   });
-  */ 
+  */
   var pointsLayer = new ol.layer.Image({
       source: new ol.source.ImageVector({
         source: new ol.source.GeoJSON({
