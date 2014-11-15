@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Antipodes ES/NZ School Map</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- build:css styles/style.min.css -->
+        <!-- bower:css -->
+        <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="lib/ol3-unofficial/ol.css" />
+        <link rel="stylesheet" href="lib/selectize/dist/css/selectize.bootstrap3.css" />
+        <link rel="stylesheet" href="lib/bootstrap-tour/build/css/bootstrap-tour.css" />
+        <!-- endbower -->
+        <!-- inject:css -->
+        <link rel="stylesheet" href="/styles/antipodes.css">
+        <!-- endinject -->
+        <!-- endbuild -->
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+      <div class="container">
+
+        <header class="" id="top" role="banner">
+          <nav class="navbar navbar-default" role="navigation">
+            <div class="container-fluid">
+              <!-- Brand and toggle get grouped for better mobile display -->
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed"
+                  data-toggle="collapse" data-target="#myNavBar">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Antipodes Spain/New Zealand School Map</a>
+              </div>
+
+              <!-- Collect the nav links, forms, and other content for toggling -->
+              <div class="collapse navbar-collapse" id="myNavBar">
+                <ul class="nav navbar-nav navbar-right">
+                      <li><a
+                      id="help"
+                      style="display:none;"
+                      href="javascript:void(0)"
+                      onclick="showHelp();">Take a tour</a></li>
+                      <li><a data-toggle="modal" data-target="#about" href="#">About</a></li>
+                      <li><a href="https://github.com/geoinquietosvlc/antipodes-map">Repo</a></li>
+                      <li><a data-toggle="modal" data-target="#contact" href="#">Contact</a></li>
+                </ul>
+              </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+          </nav>
+        </header>
+
+        <div class="row maps">
+          <div class="col-md-6">
+            <div class="row">
+              <div class="col-md-12">
+                <div id="leftmap" class="map"></div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div id="leftmapdetails">
+                  <div class="panel panel-primary">
+                    <div class="panel-body">
+                      <div class="row  selecting-school">
+                        <div class="col-md-9 control-group">
+                          <select style="display:none;"
+                            class="select-school" placeholder="Select a school...">
+                            <option>Select a school...</option>
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <button type="button" class="btn btn-primary">Go</button>
+                        </div>
+                      </div>
+                      <div class="row lanlot">
+                          <div class="col-md-9">
+                            <p style="min-height:65px;"><strong>Address:</strong>
+                              <br/><span class="schooladdress">&nbsp;</span></p>
+                          </div>
+                          <div class="col-md-3">
+                            <p><strong>Coordinates:</strong><br/>
+                              <code>lat: <span class="lat"></span></code><br/>
+                              <code>lon: <span class="lon"></span></code></p>
+                          </div>
+                      </div>
+                      <div class="row directionToCenter">
+                        <div class="col-md-6">
+                          <p><strong>Distance to the center:
+                           </strong> <code class="disttocross">&nbsp;</code></p>
+                        </div>
+                        <div class="col-md-6">
+                          <p><strong>Direction:
+                            </strong> <code class="direction">&nbsp;</code></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="row">
+              <div class="col-md-12">
+                <div id="rightmap" class="map"></div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div id="rightmapdetails"><div class="panel panel-primary">
+                    <div class="panel-body">
+                      <div class="row  selecting-school">
+                        <div class="col-md-9 control-group">
+                          <select style="display:none;"
+                            class="select-school" placeholder="Select a school...">
+                            <option>Select a school...</option>
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <button type="button" class="btn btn-primary">Go</button>
+                        </div>
+                      </div>
+                      <div class="row lanlot">
+                          <div class="col-md-9">
+                            <p style="min-height:65px;"><strong>Address:</strong>
+                              <br/><span class="schooladdress">&nbsp;</span></p>
+                          </div>
+                          <div class="col-md-3">
+                            <p><strong>Coordinates:</strong><br/>
+                              <code>lat: <span class="lat"></span></code><br/>
+                              <code>lon: <span class="lon"></span></code></p>
+                          </div>
+                      </div>
+                      <div class="row directionToCenter">
+                        <div class="col-md-6">
+                          <p><strong>Distance to the center:
+                           </strong> <code class="disttocross">&nbsp;</code></p>
+                        </div>
+                        <div class="col-md-6">
+                          <p><strong>Direction:
+                            </strong> <code class="direction">&nbsp;</code></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row title-distances">
+          <div class="col-md-12">
+            <div class="panel panel-primary">
+              <div class="panel-body">
+                <h4 id="distance">&nbsp;</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- /container -->
+
+      <!-- About -->
+      <div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              <h4 class="modal-title" id="myModalLabel">About <em>Antipodes Map</em> </h4>
+            </div>
+            <div class="modal-body">
+                <p>A project by <a class="reference external" href="http://twitter.com/xurxosanz">Jorge Sanz</a>, <a class="reference external" href="http://twitter.com/antipodasnz">Carlos Galcerán</a> and <a class="reference external" href="http://twitter.com/vehrka">Pedro-Juan Ferrer</a></p>
+                <div class="section" id="introduction">
+                    <h4>Introduction</h4>
+                    <p>Have you ever wondered what's in the other side of the world?</p>
+                    <p>Maybe we, as in <em>WE</em> the Spanish and Kiwis, are lucky, because in the other
+                    side of the world, in the <strong>Antipodes</strong> there is another country. You know,
+                    almost 3/4 of the planet is water so...that is a very small probability of
+                    happeninOg!</p>
+                    <p>So we decided to make a map, a map aimed to entice children to answer the
+                    question who is on the other side of the world, and if they like, give them the
+                    chance to get in touch with the people there, the antipodes.</p>
+                    <p>We will love teachers in Spain and New Zealand to use this tool to teach a
+                    geography lesson to their students, and also to give them the opportunity of
+                    getting in touch with the school that they will find if they dig a tunnel
+                    through the center of the Earth.</p>
+                    <p>On every Spanish school there are English courses and in some New Zealand
+                    schools there are Spanish courses, so let’s make not the distance, nor the
+                    language the excuse to get in contact with other curious people.</p>
+                    <p>Enjoy the tool, and if you like it, please spread the  word to everyone that
+                    could be interested, and if you can... <strong>Let us know!</strong></p>
+                </div>
+                <div class="section" id="now-the-technical-thing">
+                    <h4>Now the Technical Thing</h4>
+                    <p>The embryo of this project was an idea used in the Thesis Project "Finding our antipodes
+                    - A GIS application for educational purposes " presented by Carlos Galceran for the
+                    fulfilment of his MSc in GIS at UNIGIS-University of Girona in 2005. Carlos recently
+                    mentioned the idea to Peter and Peter to Xurxo and the rest is history&hellip; </p>
+                    <p>We started this project with a bunch of data obtained from the registry of
+                    Educational Centers from New Zealand provided by Carlos and some schools from
+                    Galicia and Castilla y León in Spain obtained by Pedro. Later we found the
+                    public registry of Educational Centers from Spain, but the data was not in good
+                    shape so we had to do some webscrapping and database magic.</p>
+                    <p>In the end we finished with two sets of data that we uploaded to <a class="reference external" href="http://cartodb.com">CartoDB</a> that
+                    can be freely obtained, and hopefully reused in other projects, from <a class="reference external" href="http://vehrka.cartodb.com">Vehrka's
+                    account</a></p>
+                    <p>And then <em>Xurxo</em> made a little more of his usual (but still awesome) magic and
+                    worked out a solution for the webmap interface using (and learning to use)
+                    <a class="reference external" href="http://openlayers.org/">OpenLayers</a>.</p>
+                    <p>You can acces  s the complete code in the repository (just following the Repo
+                    link in the menu bar)</p>
+                    <p>And the rest of the history <strong>MUST be written by the users</strong></p>
+                    <p>Enjoy!..</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="modal fade" id="contact" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              <h4 class="modal-title" id="myModalLabel">Contact</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal" role="form"
+                action="//forms.brace.io/xurxosanz@gmail.com"
+                method="post">
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="name">Your name</label>
+                  <div class="col-sm-9">
+                    <input type="text" class="form-control"
+                      placeholder="Your name" name="name">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="email">Email address</label>
+                  <div class="col-sm-9">
+                    <input type="email" class="form-control"
+                      placeholder="Your e-mail" name="_replyto">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="text">Tell us something</label>
+                  <div class="col-sm-9">
+                    <textarea class="form-control"
+                    name="text" rows="3">Tell us something :)</textarea>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- build:js scripts/vendor.min.js -->
+      <!-- bower:js -->
+      <script src="lib/modernizr/modernizr.js"></script>
+      <script src="lib/jquery/dist/jquery.js"></script>
+      <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
+      <script src="lib/selectize/dist/js/standalone/selectize.js"></script>
+      <script src="lib/bootstrap-tour/build/js/bootstrap-tour.js"></script>
+      <script src="lib/ol3-unofficial/ol-debug.js"></script>
+      <!-- endbower -->
+      <!-- endbuild -->
+      <!-- build:js scripts/app.min.js -->
+      <!-- inject:js -->
+      <script src="/scripts/antipodemap.js"></script>
+      <script src="/scripts/antipodemaps.js"></script>
+      <script src="/scripts/help.js"></script>
+      <script src="/scripts/main.js"></script>
+      <script src="/scripts/prototypes.js"></script>
+      <!-- endinject -->
+      <!-- endbuild -->
+    </body>
+</html>

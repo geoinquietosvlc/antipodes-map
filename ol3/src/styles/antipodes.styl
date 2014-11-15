@@ -1,0 +1,53 @@
+mapheight = 300px
+mapwidth = 100%
+crosssize = 18px
+
+body
+
+  .map
+    height  mapheight
+    width mapwidth
+
+  .maps .row
+    padding  0 10px;
+
+  .center-cross
+    position absolute
+    top  ( mapheight / 2 - crosssize / 2 )
+    left ( mapwidth / 2 - crosssize / 2 )
+    width  crosssize
+    height crosssize
+    background url('../images/cross-18.png') no-repeat center center
+
+  .panel
+    margin-top 15px
+    padding 5px
+
+  .panel-body
+    padding 5px
+
+    .row
+      padding 0 10px
+
+    .schooldata
+      text-align right
+
+    p
+      margin 0
+
+  .panel-body > .row
+    padding 10px 5px
+
+  .title-distances
+    margin -5px
+
+    .panel
+      margin-top 0
+
+      h3
+        margin 0
+
+  #about .modal-dialog{
+    width:800px;
+    max-width: 80%;
+  }

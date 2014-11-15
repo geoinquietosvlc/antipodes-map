@@ -1,0 +1,13 @@
+{
+  "name": "antipodes",
+  "version": "0.0.1",
+  "description": "Antipode OL highlighter",
+  "dependencies": {
+    "bootstrap": "~3.2.0",
+    "modernizr": "~2.8.3",
+    "ol3-unofficial": "~3.0.3",
+    "bootswatch": "~3.2.0",
+    "selectize": "~0.11.2",
+    "bootstrap-tour": "~0.10.1"
+  }
+}
