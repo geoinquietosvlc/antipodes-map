@@ -31,14 +31,61 @@ function AntipodeMap(center,opts,maps){
   });
   this.map.addControl(new CenterCrossControl());
 
-  /* add the cities vector layer */
-  this.pointsLayer = this.getPointsLayer();
+  /* add the cities cartoDB layer */
 
-  if (this.opts.layer){
-    this.map.addLayer(this.opts.layer);
+  /*this.pointsLayer = this.getPointsLayer();
+  this.map.addLayer(this.pointsLayer);*/
+
+  if (this.opts.cartoLayer){
+    var cdbOpts = this.opts.cartoLayer;
+    var map = this.map;
+    // Config object to send to CartoDB
+    var configObj = {
+      "version": "1.0.0",
+      "stat_tag": "API",
+      "layers": [
+        {
+          "type": "cartodb",
+          "options": {
+            "sql": cdbOpts.sql,
+            "cartocss": cdbOpts.css,
+            "cartocss_version": "2.1.0"
+          }
+        }
+      ]
+    };
+
+    // Promise object to load
+    var loader = Promise.resolve($.ajax({
+      url: 'https://'+ cdbOpts.user + '.cartodb.com/api/v1/map?config=' +
+        encodeURIComponent(JSON.stringify(configObj)),
+      contentType: 'text/plain',
+      xhrFields: {
+        withCredentials: false
+      },
+      dataType: "jsonp"
+    }));
+
+    loader.then(
+      function(response){
+        map.addLayer(new ol.layer.Tile({
+            source: new ol.source.XYZ({
+              attributions: [
+                new ol.Attribution(
+                    {html: 'CartoDB &copy; <a href="http:// ' +
+                      cdbOpts.user + '.cartodb.com/">' + cdbOpts.user + '</a>'
+                    })
+              ],
+              url: 'http://{0-3}.' + response.cdn_url.http + '/vehrka/api/v1/map/' + response.layergroupid + '/{z}/{x}/{y}.png'
+            })
+          }));
+      }, function(error){
+        if (console && console.error){
+          console.error(error);
+        }
+      }
+    );
   }
-  this.map.addLayer(this.pointsLayer);
-
 
 
   this.setupOverlay();
