@@ -43,7 +43,7 @@ Geom.prototype.xyzDist = function(from,to) {
  * @param   {Number} lat2, lon2: second point in decimal degrees
  * @returns (Number} distance in metres between points
  */
-Geom.prototype.distVincenty = function(lat1,lat2,lon1,lon2) {
+Geom.prototype.distVincenty = function(lat1,lon1,lat2,lon2) {
   var a = this.ellipsoid.a,
       b = this.ellipsoid.b,
       f = this.ellipsoid.f; // WGS-84 ellipsoid params
@@ -84,8 +84,8 @@ Geom.prototype.distVincenty = function(lat1,lat2,lon1,lon2) {
 };
 
 // Distance in kilometers between two points using the Haversine algo.
-Geom.prototype.harvesine = function(lat1,lat2,lon1,lon2) {
-  var R = this.ellipsoid.a / 1000;
+Geom.prototype.harvesine = function(lat1,lon1,lat2,lon2) {
+  var R = (this.ellipsoid.a + this.ellipsoid.b) / 2 / 1000;
   var dLat = (lat2 - lat1).toRad();
   var dLong = (lon2 - lon1).toRad();
 

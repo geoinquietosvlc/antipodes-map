@@ -7,12 +7,12 @@ var showHelp = function(){
       title: "Navigate the maps",
       content: "Zoom in and out or use your mouse wheel"
     },
-    {
+/*    {
       element: "#leftmapdetails .selecting-school",
       title: "Select your school",
       placement: "top",
       content: "Type your school name or select it from the list. Then click on the Go button to navigate."
-    },
+    },*/
     {
       element: "#leftmapdetails .lanlot",
       title: "School details",

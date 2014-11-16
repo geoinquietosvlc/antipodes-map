@@ -29,6 +29,9 @@ body .panel-body .schooldata {
 body .panel-body p {
   margin: 0;
 }
+body .panel-body h4 {
+  margin: 0 10px;
+}
 body .panel-body > .row {
   padding: 10px 5px;
 }

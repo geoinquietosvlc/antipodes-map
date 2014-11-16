@@ -85,6 +85,7 @@ function AntipodeMap(center,opts,maps){
     );
   }
 
+  var context = this;
   // move to center if feature is clicked
   map.on('click', function(evt) {
       // Move to that coordinates and zoom
