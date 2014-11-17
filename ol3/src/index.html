@@ -10,9 +10,21 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+
+        <script>
+          paceOptions = {
+            elements: {
+              selectors: ['.ol-viewport canvas.ol-unselectable']
+            }
+          }
+        </script>
+        <!-- PACE settings from CDN -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-minimal.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+
+
         <!-- build:css styles/style.min.css -->
         <!-- bower:css -->
-        <link rel="stylesheet" href="lib/pace/themes/blue/pace-theme-minimal.css" />
         <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="lib/ol3-unofficial/ol.css" />
         <link rel="stylesheet" href="lib/selectize/dist/css/selectize.bootstrap3.css" />
@@ -23,6 +35,9 @@
         <link rel="stylesheet" href="/styles/antipodes.css">
         <!-- endinject -->
         <!-- endbuild -->
+
+
+
 
     </head>
     <body>
@@ -284,16 +299,9 @@
       </div>
 
 
-      <script>
-        paceOptions = {
-          elements: {
-            selectors: ['.ol-viewport canvas.ol-unselectable']
-          }
-        }
-      </script>
+
       <!-- build:js scripts/vendor.min.js -->
       <!-- bower:js -->
-      <script src="lib/pace/pace.js"></script>
       <script src="lib/modernizr/modernizr.js"></script>
       <script src="lib/jquery/dist/jquery.js"></script>
       <script src="lib/bootstrap/dist/js/bootstrap.js"></script>

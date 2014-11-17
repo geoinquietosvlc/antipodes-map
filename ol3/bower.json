@@ -9,7 +9,6 @@
     "bootswatch": "~3.2.0",
     "selectize": "~0.11.2",
     "bootstrap-tour": "~0.10.1",
-    "pace": "~1.0.2",
     "alertifyjs": "~0.3.12"
   }
 }

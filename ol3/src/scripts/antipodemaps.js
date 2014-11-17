@@ -61,22 +61,42 @@ AntipodesMaps.prototype.setUpTriggers = function(antipodeMap){
   var map = antipodeMap.map;
   var ctx = this;
 
-  map.on('moveend',function(){
-    var center = ol.proj.transform(this.getView().getCenter(),'EPSG:3857','EPSG:4326');
+  map.on('moveend',function(event){
 
-    var distSQL = 'SELECT cod_es, cod_nz, dist, tunn FROM gvlc_getschools(st_geomfromtext(\'POINT('
-      + center[0] + ' ' + center[1] + ')\'))';
+    var now = new Date();
+    var doIt = false;
 
-    ctx.sqlLoader(distSQL).then(
-      function(response){
-        var result = response.rows[0];
-        ctx.updateDist(result);
-      }, function(error){
-        if (console && console.error){
-          console.error(error);
+    if (! ctx.lastDistSQL){
+      ctx.lastDistSQL = now;
+      doIt = true;
+    } else if (ctx.lastDistSQL && (now - ctx.lastDistSQL) > 2000 ){
+      doIt = true;
+    }
+
+    if (doIt){
+      var center = ol.proj.transform(this.getView().getCenter(),'EPSG:3857','EPSG:4326');
+
+      var distSQL = 'SELECT cod_es, cod_nz, dist, tunn FROM gvlc_getschools(st_geomfromtext(\'POINT('
+        + center[0] + ' ' + center[1] + ')\'))';
+
+      ctx.sqlLoader(distSQL).then(
+        function(response){
+          if (ctx.verbose){
+            alertify.success("Distance between schools retreived");
+          }
+          var result = response.rows[0];
+          ctx.updateDist(result);
+        }, function(error){
+          if (console && console.error){
+            console.error(error);
+          }
         }
-      }
-    );
+      );
+
+      ctx.lastDistSQL = new Date();
+    }
+
+
   });
 }
 
@@ -120,7 +140,7 @@ AntipodesMaps.prototype.updateDist = function(distData) {
   // If we got them, just assign them and move to the schools loading
   if (lFeat && rFeat){
     if (ctx.verbose){
-      alertify.success("Rows " + distData.cod_es 
+      alertify.success("Rows " + distData.cod_es
       + " and " + distData.cod_nz + " loaded from cache");
     }
     this.leftMap.feat = lFeat;
@@ -134,7 +154,7 @@ AntipodesMaps.prototype.updateDist = function(distData) {
     $.when(defLeft,defRight).done(function(leftResp,rightResp){
       //debugger;
       if (ctx.verbose){
-        alertify.success("Rows " + distData.cod_es 
+        alertify.success("Rows " + distData.cod_es
           + " and " + distData.cod_nz + " retrieved from CartoDB");
       }
       var lResult = leftResp[0];
