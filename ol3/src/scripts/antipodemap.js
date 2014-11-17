@@ -34,9 +34,9 @@ function AntipodeMap(center,opts,maps){
   map.addControl(new CenterCrossControl());
 
   /* add the cities cartoDB layer */
-  if (this.opts.cartoLayer){
-    var cdbOpts = this.opts.cartoLayer;
-    var user = this.maps.opts.cartoUser;
+  if (this.opts.cartodb){
+    var cdbOpts = this.opts.cartodb;
+    var user = this.maps.opts.cartodb.user;
     // Config object to send to CartoDB
     var configObj = {
       "version": "1.0.0",
@@ -45,8 +45,8 @@ function AntipodeMap(center,opts,maps){
         {
           "type": "cartodb",
           "options": {
-            "sql": 'select * from ' + cdbOpts.table,
-            "cartocss": cdbOpts.css,
+            "sql": cdbOpts.sql,
+            "cartocss": cdbOpts.cartocss,
             "cartocss_version": "2.1.0"
           }
         }

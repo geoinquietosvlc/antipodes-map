@@ -5,23 +5,54 @@
  */
 function AntipodesMaps(opts) {
   this.opts = opts;
-  this.leftMap =  new AntipodeMap(opts.center,opts.left,this);
-  this.rightMap = this.leftMap.getAntipode(opts.right);
-  this.schools = {
-    "es":{},
-    "nz":{}
-  };
+  var ctx = this;
 
-  this.setUpTriggers(this.leftMap);
+  // http://vehrka.cartodb.com/api/v2/viz/9fede618-6e3d-11e4-8fc1-0e853d047bba/viz.json
 
+  $.ajax({
+    url: 'http://'+ this.opts.cartodb.user + '.cartodb.com/api/v2/viz/' + this.opts.cartodb.viz + '/viz.json',
+    contentType: 'text/plain',
+    xhrFields: {
+      withCredentials: false
+    },
+    dataType: "jsonp"
+  }).then(function (response){
+    // Configure map options with CartoDB Response
+    var layers = response.layers[1].options.layer_definition.layers;
+    var esData = layers.filter(function(l){
+        return l.options.layer_name === opts.left.properties.layername;
+      });
+    var nzData = layers.filter(function(l){
+        return l.options.layer_name === opts.right.properties.layername
+      });
 
+    if (esData.length == 1 && nzData.length == 1){
+      opts.left.cartodb = esData[0].options;
+      opts.right.cartodb = nzData[0].options;
+    }
 
-/*  var features = {};
-  features[opts.left.div] =  null;
-  features[opts.right.div] = null;
-
-  this.features = features;*/
+    ctx.setUpMaps(opts);
+  });
 }
+
+AntipodesMaps.prototype.setUpMaps = function(opts) {
+    this.leftMap =  new AntipodeMap(opts.center,opts.left,this);
+    this.rightMap = this.leftMap.getAntipode(opts.right);
+    this.schools = {
+      "es":{},
+      "nz":{}
+    };
+
+    this.setUpTriggers(this.leftMap);
+
+
+    // Set up the central cross position
+    var mapwidth = parseInt($('.map').css('width').replace('px',''));
+    var crosswidth = parseInt($('.center-cross').css('width').replace('px',''));
+    var leftCross = (mapwidth - crosswidth) / 2;
+
+    $('.center-cross').css('left',leftCross + 'px');
+};
 
 AntipodesMaps.prototype.setUpTriggers = function(antipodeMap){
   var map = antipodeMap.map;
@@ -47,14 +78,14 @@ AntipodesMaps.prototype.setUpTriggers = function(antipodeMap){
 }
 
 AntipodesMaps.prototype.sqlLoader = function(sql) {
-  return Promise.resolve($.ajax({
-    url: 'https://'+ this.opts.cartoUser + '.cartodb.com/api/v2/sql?q=' + encodeURIComponent(sql),
+  return $.ajax({
+    url: 'https://'+ this.opts.cartodb.user + '.cartodb.com/api/v2/sql?q=' + encodeURIComponent(sql),
     contentType: 'text/plain',
     xhrFields: {
       withCredentials: false
     },
     dataType: "jsonp"
-  }));
+  });
 }
 
 AntipodesMaps.prototype.updateDist = function(distData) {
@@ -68,11 +99,14 @@ AntipodesMaps.prototype.updateDist = function(distData) {
   }
 
   var schoolSQL = function(opts, id) {
-    return 'SELECT * FROM ' + opts.table + ' WHERE ' + opts.idField + ' like \'' + id + '\'';
+    var sql = 'WITH Q AS (' + opts.cartodb.sql + ') SELECT * FROM Q WHERE '
+      + opts.properties.id + ' like \'' + id + '\'';
+
+    return sql;
   }
 
   var schoolLoader = function(map,id){
-    var sql = schoolSQL(map.opts.cartoLayer, id);
+    var sql = schoolSQL(map.opts, id);
     return ctx.sqlLoader(sql);
   }
 
@@ -87,14 +121,29 @@ AntipodesMaps.prototype.updateDist = function(distData) {
     this.loadSchoolsData(distData);
   } else {
     // Take the info from CartoDB
-    schoolLoader(ctx.leftMap,distData.cod_es).then(function(leftResp){
-      ctx.leftMap.feat = leftResp.rows[0];
-      ctx.schools.es[distData.cod_es] = leftResp.rows[0];
-      schoolLoader(ctx.rightMap,distData.cod_nz).then(function(rightResp){
-        ctx.rightMap.feat = rightResp.rows[0];
-        ctx.schools.nz[distData.cod_nz]= rightResp.rows[0];
+    var defLeft = schoolLoader(ctx.leftMap,distData.cod_es);
+    var defRight = schoolLoader(ctx.rightMap,distData.cod_nz);
+
+    $.when(defLeft,defRight).done(function(leftResp,rightResp){
+      //debugger;
+      var lResult = leftResp[0];
+      var rResult = rightResp[0];
+
+      if (lResult && rResult){
+        var lRow = lResult.rows[0];
+        var rRow = rResult.rows[0];
+
+        ctx.schools.es[distData.cod_es] = ctx.leftMap.feat = lRow;
+        ctx.schools.nz[distData.cod_nz] = ctx.rightMap.feat = rRow;
+
         ctx.loadSchoolsData(distData);
-      })
+      } else {
+        if (console && console.error){
+          console.error ("Error receiving row data");
+        }
+      }
+
+
     });
   }
 };
