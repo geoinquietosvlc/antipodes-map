@@ -5,6 +5,7 @@
  */
 function AntipodesMaps(opts) {
   this.opts = opts;
+  this.verbose = opts.verbose != null || false;
   var ctx = this;
 
   // http://vehrka.cartodb.com/api/v2/viz/9fede618-6e3d-11e4-8fc1-0e853d047bba/viz.json
@@ -17,6 +18,9 @@ function AntipodesMaps(opts) {
     },
     dataType: "jsonp"
   }).then(function (response){
+    if (ctx.verbose){
+      alertify.success("Data visualization configuration loaded!");
+    }
     // Configure map options with CartoDB Response
     var layers = response.layers[1].options.layer_definition.layers;
     var esData = layers.filter(function(l){
@@ -44,7 +48,6 @@ AntipodesMaps.prototype.setUpMaps = function(opts) {
     };
 
     this.setUpTriggers(this.leftMap);
-
 
     // Set up the central cross position
     var mapwidth = parseInt($('.map').css('width').replace('px',''));
@@ -116,6 +119,10 @@ AntipodesMaps.prototype.updateDist = function(distData) {
 
   // If we got them, just assign them and move to the schools loading
   if (lFeat && rFeat){
+    if (ctx.verbose){
+      alertify.success("Rows " + distData.cod_es 
+      + " and " + distData.cod_nz + " loaded from cache");
+    }
     this.leftMap.feat = lFeat;
     this.rightMap.feat = rFeat;
     this.loadSchoolsData(distData);
@@ -126,6 +133,10 @@ AntipodesMaps.prototype.updateDist = function(distData) {
 
     $.when(defLeft,defRight).done(function(leftResp,rightResp){
       //debugger;
+      if (ctx.verbose){
+        alertify.success("Rows " + distData.cod_es 
+          + " and " + distData.cod_nz + " retrieved from CartoDB");
+      }
       var lResult = leftResp[0];
       var rResult = rightResp[0];
 

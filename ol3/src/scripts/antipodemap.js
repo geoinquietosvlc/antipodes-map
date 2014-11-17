@@ -6,6 +6,7 @@
 */
 function AntipodeMap(center,opts,maps){
   this.opts = opts;
+  this.verbose = maps.opts.verbose != null || false;
   this.divId = opts.div;
   this.highlight = undefined;
   this.maps = maps;
@@ -63,9 +64,13 @@ function AntipodeMap(center,opts,maps){
       },
       dataType: "jsonp"
     }));
-
+  
+    var ctx = this;
     loader.then(
       function(response){
+        if (ctx.verbose){
+          alertify.success(context.opts.cartodb.layer_name  +  " config loaded");
+        }
         map.addLayer(new ol.layer.Tile({
             source: new ol.source.XYZ({
               attributions: [
@@ -78,6 +83,7 @@ function AntipodeMap(center,opts,maps){
             })
           }));
       }, function(error){
+        alertify.error("Error loading CartoDB config");
         if (console && console.error){
           console.error(error);
         }

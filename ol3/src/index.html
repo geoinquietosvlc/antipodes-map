@@ -17,11 +17,13 @@
         <link rel="stylesheet" href="lib/ol3-unofficial/ol.css" />
         <link rel="stylesheet" href="lib/selectize/dist/css/selectize.bootstrap3.css" />
         <link rel="stylesheet" href="lib/bootstrap-tour/build/css/bootstrap-tour.css" />
+        <link rel="stylesheet" href="lib/alertifyjs/dist/css/alertify-bootstrap-3.css" />
         <!-- endbower -->
         <!-- inject:css -->
         <link rel="stylesheet" href="/styles/antipodes.css">
         <!-- endinject -->
         <!-- endbuild -->
+
     </head>
     <body>
         <!--[if lt IE 7]>
@@ -282,14 +284,22 @@
       </div>
 
 
+      <script>
+        paceOptions = {
+          elements: {
+            selectors: ['.ol-viewport canvas.ol-unselectable']
+          }
+        }
+      </script>
       <!-- build:js scripts/vendor.min.js -->
       <!-- bower:js -->
-      <script src="lib/modernizr/modernizr.js"></script>
       <script src="lib/pace/pace.js"></script>
+      <script src="lib/modernizr/modernizr.js"></script>
       <script src="lib/jquery/dist/jquery.js"></script>
       <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
       <script src="lib/selectize/dist/js/standalone/selectize.js"></script>
       <script src="lib/bootstrap-tour/build/js/bootstrap-tour.js"></script>
+      <script src="lib/alertifyjs/dist/js/alertify.js"></script>
       <script src="lib/ol3-unofficial/ol-debug.js"></script>
       <!-- endbower -->
       <!-- endbuild -->

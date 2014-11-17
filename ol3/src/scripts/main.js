@@ -6,6 +6,9 @@
 $( document ).ready(function() {
   // Configure the tour
   $('#help').show();
+  alertify.set({ delay: 3000 });
+
+
 
   // Configure the viewer
   new AntipodesMaps({
@@ -16,6 +19,7 @@ $( document ).ready(function() {
       user: 'vehrka',
       viz: '9fede618-6e3d-11e4-8fc1-0e853d047bba'
     },
+    verbose: $.getUrlVar('v'),
     left : {
       'div':'leftmap',
       'feat': '#lfeat',
