@@ -1,5 +1,10 @@
-#registro_centros_es{
-  marker-fill: #229a00; 
+#registro_centros_nz{
+  [spanish = 0] {
+      marker-fill: #229A00; 
+  }
+  [spanish = 1] {
+      marker-fill: #D6301D; 
+  }
   marker-width: 10; 
   marker-line-color: #FFFFFF; 
   marker-line-width: 1.5; 
@@ -15,8 +20,8 @@
     }
 }
 
-#registro_centros_es::labels[zoom > 14]{
-  text-name: [dee];
+#registro_centros_nz::labels[zoom > 14]{
+  text-name: [name];
   text-face-name: 'DejaVu Sans Book';
   text-size: 10;
   text-label-position-tolerance: 50;
