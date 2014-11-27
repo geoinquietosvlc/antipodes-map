@@ -1,9 +1,12 @@
 #registro_centros_nz{
   [spanish = 0] {
-      marker-fill: #229A00; 
+      marker-fill: #998ec3;
+      [zoom < 14] {
+        marker-comp-op: multiply; 
+      }
   }
   [spanish = 1] {
-      marker-fill: #D6301D; 
+      marker-fill: #f1a340; 
   }
   marker-width: 10; 
   marker-line-color: #FFFFFF; 
@@ -15,9 +18,6 @@
   marker-allow-overlap: true; 
   marker-clip: false; 
   marker-multi-policy: largest; 
-  [zoom < 14] {
-    marker-comp-op: multiply; 
-    }
 }
 
 #registro_centros_nz::labels[zoom > 14]{
