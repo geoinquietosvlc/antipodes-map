@@ -5,17 +5,19 @@
   Main class constructor
 */
 function AntipodeMap(center,opts,maps){
+  this.center = center;
   this.opts = opts;
+  this.maps = maps;
+
   this.verbose = maps.opts.verbose != null || false;
   this.divId = opts.div;
   this.highlight = undefined;
-  this.maps = maps;
 
   /* ol view */
   this.view = new ol.View({
-    center: center,
-    zoom: maps.opts.zoom || 7,
-    minZoom: maps.opts.minZoom || 4
+    center: this.center,
+    zoom: this.maps.opts.zoom || 7,
+    minZoom: this.maps.opts.minZoom || 4
   });
 
   /* ol3 map */
@@ -33,77 +35,128 @@ function AntipodeMap(center,opts,maps){
     view: this.view
   });
   map.addControl(new CenterCrossControl());
+  this.map = map;
+  this.setupMap();
 
+
+  // First, fill the selectize
+  var optionSelector = opts.idprefix + '-search .select-school';
+  if ($(optionSelector)[0]){
+    this.setupSelectize();
+  }
+}
+
+
+AntipodeMap.prototype.setupSelectize = function() {
+  var ctx = this;
+  var opts = this.opts;
+
+  var optionSelector = opts.idprefix + '-search .select-school';
+  var select =  $(optionSelector);
+
+
+  // Configure the dinamic selector
+  select.selectize({
+    valueField: opts.properties.id,
+    labelField: opts.properties.name,
+    searchField: opts.properties.name,
+    options:[],
+    create: false,
+    load:function(query,callback){
+      if (!query.length) return callback();
+      console.log("load..");
+      var sql = 'WITH Q AS (' + opts.cartodb.sql + ') SELECT ' +
+          opts.properties.id + ', ' +
+          opts.properties.name +
+          ' FROM Q WHERE ' + opts.properties.name +
+          ' ~~* \'%' + query + '%\' ORDER BY 2 LIMIT 10';
+      $.ajax({
+        url: 'https://'+ ctx.maps.opts.cartodb.user + '.cartodb.com/api/v2/sql?q=' + encodeURIComponent(sql),
+        type: 'GET',
+        error: function() {
+            msgError("Error retrieving school ids",error,ctx.verbose);
+            callback();
+        },
+        success: function(res) {
+            console.log("loaded");
+            callback(res.rows);
+        }
+      }); //ajax
+    } // load
+  }); // selectize
+
+
+  // Configure the button
+  var button =  $(opts.idprefix + '-search  button');
+  button.on('click', function (e) {
+      var valueSelected = $(optionSelector + " option:selected").val();
+      ctx.moveMapToId(valueSelected);
+  });
+
+};
+
+AntipodeMap.prototype.setupMap = function() {
   /* add the cities cartoDB layer */
-  if (this.opts.cartodb){
-    var cdbOpts = this.opts.cartodb;
-    var user = this.maps.opts.cartodb.user;
-    // Config object to send to CartoDB
-    var configObj = {
-      "version": "1.0.0",
-      "stat_tag": "API",
-      "layers": [
-        {
-          "type": "cartodb",
-          "options": {
-            "sql": cdbOpts.sql,
-            "cartocss": cdbOpts.cartocss,
-            "cartocss_version": "2.1.0"
-          }
-        }
-      ]
-    };
-
-    // Promise object to load
-    var loader = Promise.resolve($.ajax({
-      url: 'https://'+ user + '.cartodb.com/api/v1/map?config=' +
-        encodeURIComponent(JSON.stringify(configObj)),
-      contentType: 'text/plain',
-      xhrFields: {
-        withCredentials: false
-      },
-      dataType: "jsonp"
-    }));
-  
-    var ctx = this;
-    loader.then(
-      function(response){
-        if (ctx.verbose){
-          alertify.success(context.opts.cartodb.layer_name  +  " config loaded");
-        }
-        map.addLayer(new ol.layer.Tile({
-            source: new ol.source.XYZ({
-              attributions: [
-                new ol.Attribution(
-                    {html: 'CartoDB &copy; <a href="http:// ' +
-                      user + '.cartodb.com/">' + user + '</a>'
-                    })
-              ],
-              url: 'http://{0-3}.' + response.cdn_url.http + '/vehrka/api/v1/map/' + response.layergroupid + '/{z}/{x}/{y}.png'
-            })
-          }));
-      }, function(error){
-        alertify.error("Error loading CartoDB config");
-        if (console && console.error){
-          console.error(error);
+  var cdbOpts = this.opts.cartodb;
+  var user = this.maps.opts.cartodb.user;
+  // Config object to send to CartoDB
+  var configObj = {
+    "version": "1.0.0",
+    "stat_tag": "API",
+    "layers": [
+      {
+        "type": "cartodb",
+        "options": {
+          "sql": cdbOpts.sql,
+          "cartocss": cdbOpts.cartocss,
+          "cartocss_version": "2.1.0"
         }
       }
-    );
-  }
+  ]}
+  // Promise object to load
+  var loader = Promise.resolve($.ajax({
+    url: 'https://'+ user + '.cartodb.com/api/v1/map?config=' +
+      encodeURIComponent(JSON.stringify(configObj)),
+    contentType: 'text/plain',
+    xhrFields: {
+      withCredentials: false
+    },
+    dataType: "jsonp"
+  }));
+
+  var ctx = this;
+  loader.then(
+    function(response){
+      if (ctx.verbose){
+        alertify.success(context.opts.cartodb.layer_name  +  " config loaded");
+      }
+      map.addLayer(new ol.layer.Tile({
+          source: new ol.source.XYZ({
+            attributions: [
+              new ol.Attribution(
+                  {html: 'CartoDB &copy; <a href="http:// ' +
+                    user + '.cartodb.com/">' + user + '</a>'
+                  })
+            ],
+            url: 'http://{0-3}.' + response.cdn_url.http + '/vehrka/api/v1/map/' + response.layergroupid + '/{z}/{x}/{y}.png'
+          })
+        }));
+    }, function(error){
+      msgError("Error loading CartoDB config",error,ctx,verbose);
+    }
+  );
 
   var context = this;
+  var map = this.map;
+
   // move to center if feature is clicked
   map.on('click', function(evt) {
       // Move to that coordinates and zoom
       context.moveMap(map.getCoordinateFromPixel(evt.pixel));
   });
 
-
-  this.map = map;
   this.setupOverlay();
-}
-
-
+};
 
 
 // TODO: move to CartoDB
@@ -202,6 +255,28 @@ AntipodeMap.prototype.moveMap = function(coord){
   this.map.getView().setZoom(10);
   this.map.getView().setCenter(coord);
 }
+
+AntipodeMap.prototype.moveMapToId = function(id) {
+  var ctx = this;
+  var opts = this.opts;
+  var sql = 'WITH Q AS (' + opts.cartodb.sql + ') SELECT ' +
+    opts.properties.lat + ' AS lat, ' +
+    opts.properties.lon + ' AS lon ' +
+    ' FROM Q WHERE ' + opts.properties.id  +
+    '~\'' + id + '\'';
+
+  this.maps.sqlLoader(sql).then(
+    function(response){
+      if (response.rows[0]){
+        var lonlat = response.rows[0];
+        var coords = ol.proj.transform([lonlat.lon,lonlat.lat], 'EPSG:4326', 'EPSG:3857');
+        ctx.moveMap(coords);
+      }
+    },function(error){
+      msgError("Error retrieving school coords",error,ctx.verbose);
+    }
+  ); //then
+};
 
 AntipodeMap.prototype.displayLabel = function(feature,featureOverlay) {
   var labeled = this.labeled;

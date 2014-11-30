@@ -23,7 +23,7 @@ $( document ).ready(function() {
     left : {
       'div':'leftmap',
       'feat': '#lfeat',
-      'detailDiv':'#leftmapdetails',
+      'idprefix':'#leftmap',
       'properties': {
         'tablename': 'Registro_centros_es',
         'layername': 'registro_centros_es',
@@ -37,7 +37,7 @@ $( document ).ready(function() {
     right : {
       'div':'rightmap',
       'feat': '#rfeat',
-      'detailDiv':'#rightmapdetails',
+      'idprefix':'#rightmap',
       'properties': {
         'tablename': 'registro_centros_nz',
         'layername': 'registro_centros_nz',

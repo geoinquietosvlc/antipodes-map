@@ -73,3 +73,15 @@ $.extend({
     return $.getUrlVars()[name];
   }
 });
+
+
+function msgError(msg,error,verbose){
+  var msg = "Error loading school ids";
+  if (verbose && alertify){
+    alertify.error(msg);
+  }
+  if (console && console.error){
+    console.error(msg);
+    console.error(error);
+  }
+}

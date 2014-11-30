@@ -87,9 +87,7 @@ AntipodesMaps.prototype.setUpTriggers = function(antipodeMap){
           var result = response.rows[0];
           ctx.updateDist(result);
         }, function(error){
-          if (console && console.error){
-            console.error(error);
-          }
+          msgError("Error obtaining distance of schools",error,ctx.verbose);
         }
       );
 
@@ -169,9 +167,7 @@ AntipodesMaps.prototype.updateDist = function(distData) {
 
         ctx.loadSchoolsData(distData);
       } else {
-        if (console && console.error){
-          console.error ("Error receiving row data");
-        }
+        msgError("Error receiving row data","",ctx.verbose);
       }
 
 
@@ -198,23 +194,20 @@ AntipodesMaps.prototype.loadSchoolsData = function(distData) {
     var xyPoint = getXYPoint(geoPoint);
     var xyCenter = map.getView().getCenter();
 
-    // Set the selector
-    // var optionSelector = opts.detailDiv + ' .select-school';
-    // $(optionSelector)[0].selectize.setValue(feature.getProperties()[opts.idProp || 'id']);
-
-    $(opts.detailDiv + ' .schoolname')
+    // Set the selector or print the div
+    var divDetails = $(opts.idprefix + '-details');
+    divDetails.find('.schoolname')
       .text(feature[props.name]);
 
-    // Set the school details
-    // $(opts.detailDiv + " .schoolname").text(feature.getProperties()[opts.nameProp || '...']);
-    $(opts.detailDiv + " .schooladdress")
+
+    divDetails.find(" .schooladdress")
       .text(feature[props.address] || '...');
-    $(opts.detailDiv + " .lon")
+    divDetails.find(" .lon")
       .text(geoPoint[0].toFixed(4));
-    $(opts.detailDiv + " .lat")
+    divDetails.find(" .lat")
       .text(geoPoint[1].toFixed(4));
     var dist = geom.distance(geoPoint,geoCenter,true);
-    $(opts.detailDiv + " .disttocross")
+    divDetails.find(" .disttocross")
       .text( dist.toFixed(1)  + " kms");
     var dir;
     if ( dist < .1 ) {
@@ -222,7 +215,7 @@ AntipodesMaps.prototype.loadSchoolsData = function(distData) {
     } else {
       dir = geom.direction(xyCenter,xyPoint).toFixed(4)+'º'
     }
-    $(opts.detailDiv + " .direction").text(dir);
+    $(opts.idprefix + " .direction").text(dir);
   }
 
   var lFeat = this.leftMap.feat;
