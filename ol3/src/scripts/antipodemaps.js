@@ -199,6 +199,12 @@ AntipodesMaps.prototype.loadSchoolsData = function(distData) {
     divDetails.find('.schoolname')
       .text(feature[props.name]);
 
+    if (feature['spanish'] === 1){
+      divDetails.find('.isSpanish').show();
+    } else {
+      divDetails.find('.isSpanish').hide();
+    }
+
 
     divDetails.find(" .schooladdress")
       .text(feature[props.address] || '...');

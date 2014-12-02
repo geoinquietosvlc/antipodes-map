@@ -32,6 +32,9 @@ body .panel-body p {
 body .panel-body h4 {
   margin: 0 10px;
 }
+body .panel-body .isSpanish {
+  display: none;
+}
 body .panel-body > .row {
   padding: 10px 5px;
 }
