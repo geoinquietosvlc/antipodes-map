@@ -215,7 +215,7 @@ AntipodesMaps.prototype.loadSchoolsData = function(distData) {
     } else {
       dir = geom.direction(xyCenter,xyPoint).toFixed(4)+'º'
     }
-    $(opts.idprefix + " .direction").text(dir);
+    $(opts.idprefix + "-details .direction").text(dir);
   }
 
   var lFeat = this.leftMap.feat;
