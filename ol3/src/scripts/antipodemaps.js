@@ -226,7 +226,7 @@ AntipodesMaps.prototype.loadSchoolsData = function(distData) {
 
   var lFeat = this.leftMap.feat;
   var rFeat = this.rightMap.feat;
-  var dist = distData.dist;
+  var dist = distData.dist / 1000;
   var tunn = distData.tunn;
 
   if (lFeat && rFeat){
