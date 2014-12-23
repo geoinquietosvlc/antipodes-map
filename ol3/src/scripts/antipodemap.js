@@ -162,17 +162,14 @@ AntipodeMap.prototype.setupMap = function() {
 // TODO: move to CartoDB
 AntipodeMap.prototype.setupOverlay = function() {
 
-  var layer = this.pointsLayer;
-  var context = this;
   var map = this.map;
-  var mapOpts = this.maps.opts;
-  var nameProp = this.opts.nameProp;
+  var nameProp = this.opts.properties.name;
 
   var styleFunction = function(feature, resolution){
     var fontSize = 14;
     return [new ol.style.Style({
        image: new ol.style.Circle({
-        radius: resolution < 300 ? 12 : 4 ,
+        radius: resolution < 300 ? 10 : 6 ,
         fill: new ol.style.Fill({color: 'rgba(164, 0, 0, 1)'}),
         stroke: new ol.style.Stroke({
             color: 'rgba(255, 255, 255, 1)',
@@ -193,7 +190,7 @@ AntipodeMap.prototype.setupOverlay = function() {
     })];
   };
 
-  var featureOverlay = new ol.FeatureOverlay({
+  this.featureOverlay = new ol.FeatureOverlay({
     map: map,
     style: styleFunction
   });
@@ -202,23 +199,25 @@ AntipodeMap.prototype.setupOverlay = function() {
 
 
 // TODO: move to CartoDB
-AntipodeMap.prototype.displayClosestCity = function(center,featureOverlay) {
-/*  var highlight = this.highlight;
+AntipodeMap.prototype.displayClosestCity = function(row) {
+  var obj = row.properties;
+  obj['geometry'] = new ol.geom.Point(
+    ol.proj.transform(row.geometry.coordinates, 'EPSG:4326', 'EPSG:3857')
+    );
 
-  var feature = source.getClosestFeatureToCoordinate(center);
+  var feature = new ol.Feature(obj)
+
+  var highlight = this.highlight;
+
   if (feature !== highlight) {
     if (highlight) {
-      featureOverlay.removeFeature(highlight);
+      this.featureOverlay.removeFeature(highlight);
     }
     if (feature) {
-      featureOverlay.addFeature(feature);
+      this.featureOverlay.addFeature(feature);
     }
   }
   this.highlight = feature;
-  if (feature){
-    this.maps.features[this.divId] = feature;
-    this.maps.updateDist();
-  }*/
 };
 
 
@@ -252,7 +251,11 @@ AntipodeMap.prototype.moveMap = function(coord){
     source: (this.getView().getCenter())
   });
   this.map.beforeRender(pan);
-  this.map.getView().setZoom(10);
+
+  if (this.map.getView().getZoom()<10){
+    this.map.getView().setZoom(10);
+  }
+
   this.map.getView().setCenter(coord);
 }
 

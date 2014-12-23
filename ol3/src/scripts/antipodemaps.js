@@ -69,7 +69,7 @@ AntipodesMaps.prototype.setUpTriggers = function(antipodeMap){
     if (! ctx.lastDistSQL){
       ctx.lastDistSQL = now;
       doIt = true;
-    } else if (ctx.lastDistSQL && (now - ctx.lastDistSQL) > 2000 ){
+    } else if (ctx.lastDistSQL && (now - ctx.lastDistSQL) > 100 ){
       doIt = true;
     }
 
@@ -98,9 +98,11 @@ AntipodesMaps.prototype.setUpTriggers = function(antipodeMap){
   });
 }
 
-AntipodesMaps.prototype.sqlLoader = function(sql) {
+AntipodesMaps.prototype.sqlLoader = function(sql,isGeoJSON) {
+  var geojson = isGeoJSON ? "&format=geojson" : "";
+  var url = 'https://'+ this.opts.cartodb.user + '.cartodb.com/api/v2/sql?q=' + encodeURIComponent(sql) + geojson;
   return $.ajax({
-    url: 'https://'+ this.opts.cartodb.user + '.cartodb.com/api/v2/sql?q=' + encodeURIComponent(sql),
+    url: url,
     contentType: 'text/plain',
     xhrFields: {
       withCredentials: false
@@ -128,7 +130,7 @@ AntipodesMaps.prototype.updateDist = function(distData) {
 
   var schoolLoader = function(map,id){
     var sql = schoolSQL(map.opts, id);
-    return ctx.sqlLoader(sql);
+    return ctx.sqlLoader(sql,true);
   }
 
   // Try to get the schools from the cache
@@ -159,8 +161,8 @@ AntipodesMaps.prototype.updateDist = function(distData) {
       var rResult = rightResp[0];
 
       if (lResult && rResult){
-        var lRow = lResult.rows[0];
-        var rRow = rResult.rows[0];
+        var lRow = lResult.features[0];
+        var rRow = rResult.features[0];
 
         ctx.schools.es[distData.cod_es] = ctx.leftMap.feat = lRow;
         ctx.schools.nz[distData.cod_nz] = ctx.rightMap.feat = rRow;
@@ -189,7 +191,7 @@ AntipodesMaps.prototype.loadSchoolsData = function(distData) {
     var opts = map.opts;
     var props = opts.properties
 
-    var geoPoint = [feature[props.lon],feature[props.lat]];
+    var geoPoint = feature.geometry.coordinates;
     var geoCenter = map.getViewGeoPoint();
     var xyPoint = getXYPoint(geoPoint);
     var xyCenter = map.getView().getCenter();
@@ -197,9 +199,9 @@ AntipodesMaps.prototype.loadSchoolsData = function(distData) {
     // Set the selector or print the div
     var divDetails = $(opts.idprefix + '-details');
     divDetails.find('.schoolname')
-      .text(feature[props.name]);
+      .text(feature.properties[props.name]);
 
-    if (feature['spanish'] === 1){
+    if (feature.properties['spanish'] === 1){
       divDetails.find('.isSpanish').show();
     } else {
       divDetails.find('.isSpanish').hide();
@@ -207,7 +209,7 @@ AntipodesMaps.prototype.loadSchoolsData = function(distData) {
 
 
     divDetails.find(" .schooladdress")
-      .text(feature[props.address] || '...');
+      .text(feature.properties[props.address] || '...');
     divDetails.find(" .lon")
       .text(geoPoint[0].toFixed(4));
     divDetails.find(" .lat")
@@ -230,7 +232,9 @@ AntipodesMaps.prototype.loadSchoolsData = function(distData) {
   var tunn = distData.tunn;
 
   if (lFeat && rFeat){
-    // Get the geodesic points
+    // Add the overlays
+    this.leftMap.displayClosestCity(lFeat);
+    this.rightMap.displayClosestCity(rFeat);
 
     // features
     var lll = lFeat.lon;
