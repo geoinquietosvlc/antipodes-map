@@ -31,7 +31,8 @@ $( document ).ready(function() {
         'address'  : 'adr',
         'lat'      : 'lat',
         'lon'      : 'lon',
-        'id'       : 'cod'
+        'id'       : 'cod',
+        'mun'      : 'loc'
       }
     },
     right : {
@@ -41,11 +42,12 @@ $( document ).ready(function() {
       'properties': {
         'tablename': 'registro_centros_nz',
         'layername': 'registro_centros_nz',
-        'name'    : 'name',
-        'address' : 'physical_address',
-        'lat'     : 'latitude',
-        'lon'     : 'longitude',
-        'id'      : 'zid'
+        'name'     : 'name',
+        'address'  : 'physical_address',
+        'lat'      : 'latitude',
+        'lon'      : 'longitude',
+        'id'       : 'zid',
+        'mun'      : ''
       }
     },
     dist: '#dist'

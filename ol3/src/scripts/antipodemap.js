@@ -58,18 +58,24 @@ AntipodeMap.prototype.setupSelectize = function() {
   // Configure the dinamic selector
   select.selectize({
     valueField: opts.properties.id,
-    labelField: opts.properties.name,
+    labelField:  opts.properties.name,
     searchField: opts.properties.name,
     options:[],
     create: false,
     load:function(query,callback){
       if (!query.length) return callback();
-      console.log("load..");
-      var sql = 'WITH Q AS (' + opts.cartodb.sql + ') SELECT ' +
-          opts.properties.id + ', ' +
-          opts.properties.name +
+      var select;
+      if (opts.properties.mun) {
+        select = 'SELECT ' + opts.properties.id + ', ' +
+          opts.properties.name + ' || \' (\' || ' + opts.properties.mun + ' || \' )\' as ' + opts.properties.name;
+      } else {
+        select = 'SELECT ' + opts.properties.id + ', ' + opts.properties.name;
+      }
+      var sql = 'WITH Q AS (' + opts.cartodb.sql + ') ' +
+          select +
           ' FROM Q WHERE ' + opts.properties.name +
           ' ~~* \'%' + query + '%\' ORDER BY 2 LIMIT 10';
+      console.log("combo: " + sql);
       $.ajax({
         url: 'https://'+ ctx.maps.opts.cartodb.user + '.cartodb.com/api/v2/sql?q=' + encodeURIComponent(sql),
         type: 'GET',
