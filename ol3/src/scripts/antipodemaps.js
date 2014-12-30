@@ -248,9 +248,9 @@ AntipodesMaps.prototype.loadSchoolsData = function(distData) {
     // Render the template
     $('#distance').html(
         '<em class="text-primary">' +
-        lFeat[this.opts.left.properties.name] + '</em> and ' +
+        lFeat.properties[this.opts.left.properties.name] + '</em> and ' +
         '<em class="text-primary">' +
-        rFeat[this.opts.right.properties.name] + '</em> are ' +
+        rFeat.properties[this.opts.right.properties.name] + '</em> are ' +
         '<strong class="text-info">' +
         addCommas(dist.toFixed(1)) + '</strong> kms away!! '+
         '(<strong class="text-info">' +
