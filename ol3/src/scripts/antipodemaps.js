@@ -69,7 +69,7 @@ AntipodesMaps.prototype.setUpTriggers = function(antipodeMap){
     if (! ctx.lastDistSQL){
       ctx.lastDistSQL = now;
       doIt = true;
-    } else if (ctx.lastDistSQL && (now - ctx.lastDistSQL) > 100 ){
+    } else if (ctx.lastDistSQL && (now - ctx.lastDistSQL) > 200 ){
       doIt = true;
     }
 
@@ -101,6 +101,9 @@ AntipodesMaps.prototype.setUpTriggers = function(antipodeMap){
 AntipodesMaps.prototype.sqlLoader = function(sql,isGeoJSON) {
   var geojson = isGeoJSON ? "&format=geojson" : "";
   var url = 'https://'+ this.opts.cartodb.user + '.cartodb.com/api/v2/sql?q=' + encodeURIComponent(sql) + geojson;
+  if (this.verbose){
+    console.log("sqlLoader: " + sql);
+  }
   return $.ajax({
     url: url,
     contentType: 'text/plain',

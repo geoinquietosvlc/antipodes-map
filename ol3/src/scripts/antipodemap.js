@@ -67,7 +67,7 @@ AntipodeMap.prototype.setupSelectize = function() {
       var select;
       if (opts.properties.mun) {
         select = 'SELECT ' + opts.properties.id + ', ' +
-          opts.properties.name + ' || \' (\' || ' + opts.properties.mun + ' || \' )\' as ' + opts.properties.name;
+          opts.properties.name + ' || \' (\' || ' + opts.properties.mun + ' || \')\' as ' + opts.properties.name;
       } else {
         select = 'SELECT ' + opts.properties.id + ', ' + opts.properties.name;
       }
@@ -75,7 +75,9 @@ AntipodeMap.prototype.setupSelectize = function() {
           select +
           ' FROM Q WHERE ' + opts.properties.name +
           ' ~~* \'%' + query + '%\' ORDER BY 2 LIMIT 10';
-      console.log("combo: " + sql);
+      if (ctx.verbose){
+        console.log("combo: " + sql);
+      }
       $.ajax({
         url: 'https://'+ ctx.maps.opts.cartodb.user + '.cartodb.com/api/v2/sql?q=' + encodeURIComponent(sql),
         type: 'GET',
@@ -120,6 +122,9 @@ AntipodeMap.prototype.setupMap = function() {
       }
   ]}
   // Promise object to load
+  if (this.verbose){
+    console.log("Loading configuration...");
+  }
   var loader = Promise.resolve($.ajax({
     url: 'https://'+ user + '.cartodb.com/api/v1/map?config=' +
       encodeURIComponent(JSON.stringify(configObj)),
@@ -159,6 +164,13 @@ AntipodeMap.prototype.setupMap = function() {
   map.on('click', function(evt) {
       // Move to that coordinates and zoom
       context.moveMap(map.getCoordinateFromPixel(evt.pixel));
+  });
+
+  map.on('pointermove', function(event) {
+    //debugger
+    var coord3857 = event.coordinate;
+    var coord4326 = ol.proj.transform(coord3857, 'EPSG:3857', 'EPSG:4326');
+    $('#' + context.opts.div + '-details .mouseposition').text(ol.coordinate.toStringXY(coord4326, 4));
   });
 
   this.setupOverlay();
