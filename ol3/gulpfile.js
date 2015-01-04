@@ -137,6 +137,8 @@ gulp.task('copy', function() {
     .pipe(gulp.dest('./build'));
   gulp.src(['./src/images/**/*'],{base:'./src'})
     .pipe(gulp.dest('./build'));
+  gulp.src(['./src/Carta_Letter.pdf'],{base:'./src'})
+    .pipe(gulp.dest('./build'));
 });
 
 // Build server
