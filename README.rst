@@ -12,4 +12,4 @@ El prototipo trabajará solo con los datos de Galicia.
 Version
 -------
 
-Esta es la versión de desarrollo v0.1
+Esta es la versión de desarrollo con CartoDB 

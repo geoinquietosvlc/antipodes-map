@@ -135,7 +135,9 @@ gulp.task('copy', function() {
   gulp.src('./src/index.html')
     .pipe(useref())
     .pipe(gulp.dest('./build'));
-  gulp.src(['./src/data/**/*','./src/images/**/*'],{base:'./src'})
+  gulp.src(['./src/images/**/*'],{base:'./src'})
+    .pipe(gulp.dest('./build'));
+  gulp.src(['./src/Carta_Letter.pdf'],{base:'./src'})
     .pipe(gulp.dest('./build'));
 });
 

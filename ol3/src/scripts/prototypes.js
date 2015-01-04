@@ -24,9 +24,9 @@ if (typeof(Number.prototype.toDeg) === 'undefined') {
 var addCommas = function(nStr)
 {
   nStr += '';
-  x = nStr.split('.');
-  x1 = x[0];
-  x2 = x.length > 1 ? '.' + x[1] : '';
+  var x = nStr.split('.');
+  var x1 = x[0];
+  var x2 = x.length > 1 ? '.' + x[1] : '';
   var rgx = /(\d+)(\d{3})/;
   while (rgx.test(x1)) {
     x1 = x1.replace(rgx, '$1' + ',' + '$2');
@@ -52,3 +52,36 @@ function CenterCrossControl(optOptions) {
 
 }
 ol.inherits(CenterCrossControl, ol.control.Control);
+
+
+/**
+ * jQuery small plugin to get URL parameters
+ */
+$.extend({
+  getUrlVars: function(){
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+      hash = hashes[i].split('=');
+      vars.push(hash[0]);
+      vars[hash[0]] = hash[1];
+    }
+    return vars;
+  },
+  getUrlVar: function(name){
+    return $.getUrlVars()[name];
+  }
+});
+
+
+function msgError(msg,error,verbose){
+  var msg = "Error loading school ids";
+  if (verbose && alertify){
+    alertify.error(msg);
+  }
+  if (console && console.error){
+    console.error(msg);
+    console.error(error);
+  }
+}
