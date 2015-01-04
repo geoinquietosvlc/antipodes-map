@@ -9,18 +9,34 @@
         <title>Antipodes ES/NZ School Map</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="images/favicon.ico">
+
+        <script>
+          paceOptions = {
+            elements: {
+              selectors: ['.ol-viewport canvas.ol-unselectable']
+            }
+          }
+        </script>
+        <!-- PACE settings from CDN -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-corner-indicator.css">
+        <!-- <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-minimal.css"> -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+
 
         <!-- build:css styles/style.min.css -->
         <!-- bower:css -->
         <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.css" />
-        <link rel="stylesheet" href="lib/ol3-unofficial/ol.css" />
+        <link rel="stylesheet" href="scripts/ol3.1.1/ol.css" />
         <link rel="stylesheet" href="lib/selectize/dist/css/selectize.bootstrap3.css" />
         <link rel="stylesheet" href="lib/bootstrap-tour/build/css/bootstrap-tour.css" />
+        <link rel="stylesheet" href="lib/alertifyjs/dist/css/alertify-bootstrap-3.css" />
         <!-- endbower -->
         <!-- inject:css -->
         <link rel="stylesheet" href="/styles/antipodes.css">
         <!-- endinject -->
         <!-- endbuild -->
+
     </head>
     <body>
         <!--[if lt IE 7]>
@@ -52,9 +68,13 @@
                       style="display:none;"
                       href="javascript:void(0)"
                       onclick="showHelp();">Take a tour</a></li>
+                      <li><a href="Carta_Letter.pdf" target="_blank">Letter</a></li>
                       <li><a data-toggle="modal" data-target="#about" href="#">About</a></li>
                       <li><a href="https://github.com/geoinquietosvlc/antipodes-map">Repo</a></li>
+                      <li><a data-toggle="modal" data-target="#error" href="#">Report an error</a></li>
                       <li><a data-toggle="modal" data-target="#contact" href="#">Contact</a></li>
+                      <li><a href="#"><span class="text-danger">Beta!</span></a></li>
+
                 </ul>
               </div><!-- /.navbar-collapse -->
             </div><!-- /.container-fluid -->
@@ -62,7 +82,26 @@
         </header>
 
         <div class="row maps">
-          <div class="col-md-6">
+          <div class="col-sm-6">
+            <div class="row">
+              <div id="leftmap-search" class="col-sm-12">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div class="row  selecting-school">
+                      <div class="col-xs-9 control-group">
+                        <select style="display:none;"
+                          class="select-school" placeholder="Select a school...">
+                          <option>Select a school...</option>
+                        </select>
+                      </div>
+                      <div class="col-xs-3">
+                        <button type="button" class="btn btn-primary">Go</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="row">
               <div class="col-md-12">
                 <div id="leftmap" class="map"></div>
@@ -70,26 +109,20 @@
             </div>
             <div class="row">
               <div class="col-md-12">
-                <div id="leftmapdetails">
+                <div id="leftmap-details">
                   <div class="panel panel-primary">
                     <div class="panel-body">
-                      <div class="row  selecting-school">
-                        <div class="col-md-9 control-group">
-                          <select style="display:none;"
-                            class="select-school" placeholder="Select a school...">
-                            <option>Select a school...</option>
-                          </select>
-                        </div>
-                        <div class="col-md-3">
-                          <button type="button" class="btn btn-primary">Go</button>
+                      <div class="row">
+                        <div class="col-md12">
+                          <h4 class="schoolname"></h4>
                         </div>
                       </div>
                       <div class="row lanlot">
-                          <div class="col-md-9">
+                          <div class="col-md-8">
                             <p style="min-height:65px;"><strong>Address:</strong>
                               <br/><span class="schooladdress">&nbsp;</span></p>
                           </div>
-                          <div class="col-md-3">
+                          <div class="col-md-4">
                             <p><strong>Coordinates:</strong><br/>
                               <code>lat: <span class="lat"></span></code><br/>
                               <code>lon: <span class="lon"></span></code></p>
@@ -111,7 +144,26 @@
               </div>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-sm-6">
+            <div class="row">
+              <div id="rightmap-search" class="col-sm-12">
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <div class="row  selecting-school">
+                      <div class="col-xs-9 control-group">
+                        <select style="display:none;"
+                          class="select-school" placeholder="Select a school...">
+                          <option>Select a school...</option>
+                        </select>
+                      </div>
+                      <div class="col-xs-3">
+                        <button type="button" class="btn btn-primary">Go</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="row">
               <div class="col-md-12">
                 <div id="rightmap" class="map"></div>
@@ -119,10 +171,13 @@
             </div>
             <div class="row">
               <div class="col-md-12">
-                <div id="rightmapdetails"><div class="panel panel-primary">
+                <div id="rightmap-details"><div class="panel panel-primary">
                     <div class="panel-body">
                       <div class="row  selecting-school">
-                        <div class="col-md-9 control-group">
+                        <div class="col-md12">
+                          <h4 ><span class="schoolname"></span>&nbsp;<span class="isSpanish label label-danger">Spanish</span></h4>
+                        </div>
+<!--                         <div class="col-md-9 control-group">
                           <select style="display:none;"
                             class="select-school" placeholder="Select a school...">
                             <option>Select a school...</option>
@@ -130,14 +185,14 @@
                         </div>
                         <div class="col-md-3">
                           <button type="button" class="btn btn-primary">Go</button>
-                        </div>
+                        </div> -->
                       </div>
                       <div class="row lanlot">
-                          <div class="col-md-9">
+                          <div class="col-md-8">
                             <p style="min-height:65px;"><strong>Address:</strong>
                               <br/><span class="schooladdress">&nbsp;</span></p>
                           </div>
-                          <div class="col-md-3">
+                          <div class="col-md-4">
                             <p><strong>Coordinates:</strong><br/>
                               <code>lat: <span class="lat"></span></code><br/>
                               <code>lon: <span class="lon"></span></code></p>
@@ -241,7 +296,7 @@
             </div>
             <div class="modal-body">
               <form class="form-horizontal" role="form"
-                action="//forms.brace.io/xurxosanz@gmail.com"
+                action="//formspree.io/xurxosanz@gmail.com"
                 method="post">
                 <div class="form-group">
                   <label class="col-sm-3 control-label" for="name">Your name</label>
@@ -273,6 +328,51 @@
           </div>
         </div>
       </div>
+      <!-- Error -->
+      <div class="modal fade" id="error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              <h4 class="modal-title" id="myModalLabel">An error on an school address or position? Tell us!</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal" role="form"
+                action="//formspree.io/xurxosanz@gmail.com"
+                method="post">
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="name">Your name</label>
+                  <div class="col-sm-9">
+                    <input type="text" class="form-control"
+                      placeholder="Your name" name="name">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="email">Email address</label>
+                  <div class="col-sm-9">
+                    <input type="email" class="form-control"
+                      placeholder="Your e-mail" name="_replyto">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-3 control-label" for="text">Error to report</label>
+                  <div class="col-sm-9">
+                    <textarea class="form-control"
+                        name="text" rows="3">School Name:
+School Direction:
+School Coordinates:</textarea>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
 
       <!-- build:js scripts/vendor.min.js -->
@@ -282,16 +382,21 @@
       <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
       <script src="lib/selectize/dist/js/standalone/selectize.js"></script>
       <script src="lib/bootstrap-tour/build/js/bootstrap-tour.js"></script>
-      <script src="lib/ol3-unofficial/ol-debug.js"></script>
+      <script src="lib/alertifyjs/dist/js/alertify.js"></script>
+      <script src="scripts/ol3.1.1/ol.js"></script>
       <!-- endbower -->
       <!-- endbuild -->
       <!-- build:js scripts/app.min.js -->
       <!-- inject:js -->
       <script src="/scripts/antipodemap.js"></script>
       <script src="/scripts/antipodemaps.js"></script>
+      <script src="/scripts/geom.js"></script>
       <script src="/scripts/help.js"></script>
       <script src="/scripts/main.js"></script>
       <script src="/scripts/prototypes.js"></script>
+      <script src="/scripts/ol3.1.1/ol-debug.js"></script>
+      <script src="/scripts/ol3.1.1/ol-deps.js"></script>
+      <script src="/scripts/ol3.1.1/ol.js"></script>
       <!-- endinject -->
       <!-- endbuild -->
     </body>

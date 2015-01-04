@@ -91,3 +91,29 @@ $$ LANGUAGE 'plpgsql' STRICT IMMUTABLE;
 
 -- USAGE
 -- SELECT cod_es, cod_nz, dist, tunn FROM gvlc_getschools(st_geomfromtext('POINT(-5.8118 41.6501)'))
+
+BEGIN TRANSACTION;
+
+CREATE OR REPLACE FUNCTION tggFunction_updateCentros_es() RETURNS trigger AS
+$$
+  BEGIN
+    IF ((NEW.lon != OLD.lon) OR (NEW.lat != OLD.lat)) THEN
+      NEW.the_geom = ST_SetSRID(ST_MAKEPOINT(NEW.lon, NEW.lat),4326);
+      NEW.the_geom_webmercator = ST_TRANSFORM(ST_SetSRID(ST_MAKEPOINT(NEW.lon, NEW.lat),4326),3857);
+    ELSE
+      IF (NOT (NEW.the_geom ~= OLD.the_geom)) THEN
+        NEW.lon = ST_X (NEW.the_geom);
+        NEW.lat = ST_Y (NEW.the_geom);
+      END IF;
+    END IF;
+
+    RETURN NEW;
+  END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tggUpdateCentros_es ON registro_centros_es;
+CREATE TRIGGER tggUpdateCentros_es
+  BEFORE UPDATE ON registro_centros_es
+  FOR EACH ROW EXECUTE PROCEDURE tggFunction_updateCentros_es();
+
+END TRANSACTION;
