@@ -11,7 +11,7 @@ var showHelp = function(){
     {
       element: "#leftmap .ol-zoom",
       title: "Navigate the maps",
-      content: "Zoom in and out or use your mouse wheel. Click on the map to move to that location."
+      content: "Zoom in and out or use your mouse wheel. Click on the map to move to that location. Both maps are synchronized and NZ map shows in orange schools that teach Spanish!"
     },
     {
       element: "#leftmap-details .lanlot",
