@@ -1,0 +1,45 @@
+{
+  "name": "alertify.js",
+  "version": "0.3.18",
+  "main": "dist/js/alertify.js",
+  "homepage": "https://alertifyjs.org",
+  "keywords": [
+    "alert",
+    "alertify",
+    "dialog",
+    "js"
+  ],
+  "authors": [
+    {
+      "name": "Fabien Doiron",
+      "email": "fabien.doiron@gmail.com"
+    },
+    {
+      "name": "Brad Berger",
+      "email": "brad@bradb.net",
+      "homepage": "https://bradb.net"
+    }
+  ],
+  "ignore": [
+    ".gitignore",
+    "gulpfile.js",
+    "package.json",
+    "test",
+    "example",
+    ".travis.yml",
+    "Contributors.md"
+  ],
+  "devDependencies": {
+    "jquery": "*",
+    "qunit": "~1.16.0"
+  },
+  "_release": "0.3.18",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.3.18",
+    "commit": "92b4996a4d4c0a2a99f93e168a8dc8ac35166669"
+  },
+  "_source": "https://github.com/alertifyjs/alertify.js.git",
+  "_target": "~0.3.12",
+  "_originalSource": "alertifyjs"
+}
